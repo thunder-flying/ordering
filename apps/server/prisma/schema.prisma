@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum UploadPurpose {
+  DISH_IMAGE
+  AVATAR
+}
+
+enum UploadReferenceState {
+  UNREFERENCED
+  REFERENCED
+  PENDING_DELETE
+}
+
+model User {
+  id                    String        @id @default(cuid())
+  openidDigest          String        @unique @db.Char(64)
+  nickname              String        @default("微信用户") @db.VarChar(40)
+  avatarUploadId        String?       @unique
+  onboardingCompletedAt DateTime?     @db.DateTime(3)
+  firstLoginAt          DateTime      @default(now()) @db.DateTime(3)
+  lastLoginAt           DateTime      @default(now()) @db.DateTime(3)
+  createdAt             DateTime      @default(now()) @db.DateTime(3)
+  updatedAt             DateTime      @updatedAt @db.DateTime(3)
+  avatarUpload          Upload?       @relation("UserAvatar", fields: [avatarUploadId], references: [id], onDelete: SetNull)
+  ownedUploads          Upload[]      @relation("UploadOwner")
+  sessions              UserSession[]
+  favorites             Favorite[]
+  savedLists            SavedList[]
+
+  @@map("users")
+}
+
+model UserSession {
+  id         String   @id @default(cuid())
+  userId     String
+  tokenHash  String   @unique @db.Char(64)
+  expiresAt  DateTime @db.DateTime(3)
+  lastUsedAt DateTime @default(now()) @db.DateTime(3)
+  createdAt  DateTime @default(now()) @db.DateTime(3)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("user_sessions")
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @db.VarChar(20)
+  sortOrder Int       @default(0)
+  enabled   Boolean   @default(true)
+  deletedAt DateTime? @db.DateTime(3)
+  createdAt DateTime  @default(now()) @db.DateTime(3)
+  updatedAt DateTime  @updatedAt @db.DateTime(3)
+  dishes    Dish[]
+
+  @@index([enabled, deletedAt, sortOrder])
+  @@map("categories")
+}
+
+model Dish {
+  id            String     @id @default(cuid())
+  categoryId    String
+  imageUploadId String?    @unique
+  name          String     @db.VarChar(40)
+  description   String     @default("") @db.VarChar(300)
+  priceCents    Int
+  sortOrder     Int        @default(0)
+  published     Boolean    @default(false)
+  deletedAt     DateTime?  @db.DateTime(3)
+  createdAt     DateTime   @default(now()) @db.DateTime(3)
+  updatedAt     DateTime   @updatedAt @db.DateTime(3)
+  category      Category   @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  imageUpload   Upload?    @relation("DishImage", fields: [imageUploadId], references: [id], onDelete: SetNull)
+  favorites     Favorite[]
+  listItems     ListItem[]
+
+  @@index([categoryId, published, deletedAt, sortOrder])
+  @@index([published, deletedAt, name])
+  @@map("dishes")
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  dishId    String
+  createdAt DateTime @default(now()) @db.DateTime(3)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dish      Dish     @relation(fields: [dishId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, dishId])
+  @@index([dishId])
+  @@map("favorites")
+}
+
+model SavedList {
+  id             String     @id @default(cuid())
+  userId         String
+  name           String     @db.VarChar(40)
+  totalCents     Int
+  idempotencyKey String     @db.VarChar(64)
+  createdAt      DateTime   @default(now()) @db.DateTime(3)
+  updatedAt      DateTime   @updatedAt @db.DateTime(3)
+  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items          ListItem[]
+
+  @@unique([userId, idempotencyKey])
+  @@index([userId, updatedAt])
+  @@map("saved_lists")
+}
+
+model ListItem {
+  id                 String    @id @default(cuid())
+  savedListId        String
+  dishId             String?
+  dishNameSnapshot   String    @db.VarChar(40)
+  priceCentsSnapshot Int
+  quantity           Int
+  note               String    @default("") @db.VarChar(100)
+  position           Int
+  createdAt          DateTime  @default(now()) @db.DateTime(3)
+  updatedAt          DateTime  @updatedAt @db.DateTime(3)
+  savedList          SavedList @relation(fields: [savedListId], references: [id], onDelete: Cascade)
+  dish               Dish?     @relation(fields: [dishId], references: [id], onDelete: SetNull)
+
+  @@unique([savedListId, position])
+  @@index([dishId])
+  @@map("list_items")
+}
+
+model Upload {
+  id                String               @id @default(cuid())
+  ownerUserId       String?
+  purpose           UploadPurpose
+  storageKey        String               @unique @db.VarChar(255)
+  originalMediaType String               @db.VarChar(100)
+  detectedMediaType String               @db.VarChar(100)
+  byteSize          Int
+  sha256            String               @db.Char(64)
+  referenceState    UploadReferenceState @default(UNREFERENCED)
+  pendingDeleteAt   DateTime?            @db.DateTime(3)
+  createdAt         DateTime             @default(now()) @db.DateTime(3)
+  ownerUser         User?                @relation("UploadOwner", fields: [ownerUserId], references: [id], onDelete: SetNull)
+  avatarForUser     User?                @relation("UserAvatar")
+  imageForDish      Dish?                @relation("DishImage")
+
+  @@index([ownerUserId])
+  @@index([referenceState, pendingDeleteAt])
+  @@map("uploads")
+}

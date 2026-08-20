@@ -1,0 +1,17 @@
+services:
+  mysql-test:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ordering_test
+      MYSQL_PASSWORD: ordering_test_password
+      MYSQL_ROOT_PASSWORD: root_test_password
+      MYSQL_USER: ordering
+    ports:
+      - "127.0.0.1:33070:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+    volumes:
+      - ./mysql-test-init:/docker-entrypoint-initdb.d:ro

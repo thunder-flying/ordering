@@ -13,3 +13,4 @@ var/uploads/
 project.private.config.json
 *.log
 *.tsbuildinfo
+apps/server/src/generated/prisma/
