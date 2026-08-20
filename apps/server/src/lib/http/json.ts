@@ -16,3 +16,18 @@ export async function parseJson<T>(
     );
   }
 }
+
+export function parseSearchParams<T>(
+  searchParams: URLSearchParams,
+  schema: z.ZodType<T>,
+): T {
+  try {
+    return schema.parse(Object.fromEntries(searchParams));
+  } catch {
+    throw new ApiError(
+      "VALIDATION_ERROR",
+      "查询参数格式不正确",
+      400,
+    );
+  }
+}

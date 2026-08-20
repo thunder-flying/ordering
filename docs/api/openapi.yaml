@@ -1131,7 +1131,7 @@ components:
         categoryId: { $ref: '#/components/schemas/ResourceId' }
         name: { type: string, minLength: 1, maxLength: 40 }
         description: { type: string, maxLength: 300 }
-        imageUrl: { type: string, format: uri }
+        imageUrl: { type: string, format: uri-reference }
         referencePriceCents: { $ref: '#/components/schemas/NonNegativeCents' }
         sortOrder: { type: integer, minimum: 0, maximum: 9999 }
     PublicDishPageResponse:
@@ -1398,12 +1398,14 @@ components:
         sortOrder: { type: integer, minimum: 0, maximum: 9999 }
         enabled: { type: boolean }
     CategoryUpdateRequest:
-      allOf:
-        - { $ref: '#/components/schemas/CategoryCreateRequest' }
-        - type: object
-          required: [expectedUpdatedAt]
-          properties:
-            expectedUpdatedAt: { $ref: '#/components/schemas/DateTime' }
+      type: object
+      additionalProperties: false
+      required: [name, sortOrder, enabled, expectedUpdatedAt]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 20 }
+        sortOrder: { type: integer, minimum: 0, maximum: 9999 }
+        enabled: { type: boolean }
+        expectedUpdatedAt: { $ref: '#/components/schemas/DateTime' }
     OptimisticDeleteRequest:
       type: object
       additionalProperties: false
