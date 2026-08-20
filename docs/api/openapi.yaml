@@ -510,7 +510,7 @@ paths:
         '500': { $ref: '#/components/responses/InternalError' }
     get:
       tags: [Admin Auth]
-      summary: 获取当前管理员会话及新的 CSRF 令牌
+      summary: 获取当前管理员会话及 CSRF 令牌
       operationId: getAdminSession
       security:
         - adminSession: []
