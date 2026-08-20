@@ -1467,12 +1467,18 @@ components:
         sortOrder: { type: integer, minimum: 0, maximum: 9999 }
         published: { type: boolean }
     DishUpdateRequest:
-      allOf:
-        - { $ref: '#/components/schemas/DishCreateRequest' }
-        - type: object
-          required: [expectedUpdatedAt]
-          properties:
-            expectedUpdatedAt: { $ref: '#/components/schemas/DateTime' }
+      type: object
+      additionalProperties: false
+      required: [categoryId, name, description, referencePriceCents, imageUploadId, sortOrder, published, expectedUpdatedAt]
+      properties:
+        categoryId: { $ref: '#/components/schemas/ResourceId' }
+        name: { type: string, minLength: 1, maxLength: 40 }
+        description: { type: string, maxLength: 300 }
+        referencePriceCents: { $ref: '#/components/schemas/NonNegativeCents' }
+        imageUploadId: { $ref: '#/components/schemas/ResourceId' }
+        sortOrder: { type: integer, minimum: 0, maximum: 9999 }
+        published: { type: boolean }
+        expectedUpdatedAt: { $ref: '#/components/schemas/DateTime' }
     AdminDish:
       type: object
       additionalProperties: false
@@ -1484,7 +1490,7 @@ components:
         name: { type: string, minLength: 1, maxLength: 40 }
         description: { type: string, maxLength: 300 }
         referencePriceCents: { $ref: '#/components/schemas/NonNegativeCents' }
-        imageUrl: { type: string, format: uri }
+        imageUrl: { type: string, format: uri-reference }
         imageUploadId: { $ref: '#/components/schemas/ResourceId' }
         sortOrder: { type: integer, minimum: 0, maximum: 9999 }
         published: { type: boolean }
@@ -1528,7 +1534,7 @@ components:
         id: { $ref: '#/components/schemas/ResourceId' }
         mediaType: { type: string, enum: [image/jpeg, image/png, image/webp] }
         bytes: { type: integer, minimum: 1, maximum: 5242880 }
-        previewUrl: { type: string, format: uri }
+        previewUrl: { type: string, format: uri-reference }
     UploadResponse:
       type: object
       additionalProperties: false
