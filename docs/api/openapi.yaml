@@ -12,6 +12,8 @@ servers:
   - url: /
     description: 与管理后台或小程序配置域名相同的当前服务源
 tags:
+  - name: Health
+    description: 不暴露内部信息的服务可用性检查
   - name: Auth
     description: 微信用户会话建立与退出
   - name: Profile
@@ -34,6 +36,25 @@ tags:
     description: 公开菜品图片和签名头像读取
 
 paths:
+  /api/v1/health:
+    get:
+      tags: [Health]
+      summary: 检查服务和数据库可用性
+      operationId: getHealth
+      security: []
+      responses:
+        '200':
+          description: 服务和数据库可用
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HealthResponse' }
+        '503':
+          description: 数据库暂时不可用
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HealthResponse' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+
   /api/v1/auth/wechat:
     post:
       tags: [Auth]
@@ -950,6 +971,19 @@ components:
           schema: { $ref: '#/components/schemas/ErrorResponse' }
 
   schemas:
+    HealthResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data]
+      properties:
+        ok: { const: true, type: boolean }
+        data:
+          type: object
+          additionalProperties: false
+          required: [status]
+          properties:
+            status: { type: string, enum: [ok, unavailable] }
+
     ResourceId:
       type: string
       minLength: 20

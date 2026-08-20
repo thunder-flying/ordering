@@ -49,6 +49,7 @@
 
 | 范围 | 方法与路径 | 用途 |
 | --- | --- | --- |
+| 系统 | `GET /api/v1/health` | 检查服务和数据库可用性 |
 | 身份 | `POST /api/v1/auth/wechat` | 微信静默登录 |
 | 身份 | `DELETE /api/v1/auth/logout` | 退出当前用户会话 |
 | 资料 | `GET/PATCH /api/v1/profile` | 读取或修改昵称 |
