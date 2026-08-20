@@ -20,18 +20,18 @@ pnpm install --frozen-lockfile
 
 ## 2. 启动本地 MySQL
 
-仓库提供只监听 `127.0.0.1:33070` 的测试数据库：
+仓库提供 `deploy/docker-compose.yml`，用于启动只监听 `127.0.0.1:33070` 的本地 MySQL：
 
 ```powershell
-docker compose -f deploy/docker-compose.test.yml up -d --wait
-$env:DATABASE_URL='mysql://ordering:ordering_test_password@127.0.0.1:33070/ordering_test'
+docker compose -f deploy/docker-compose.yml up -d --wait
+$env:DATABASE_URL='mysql://ordering:123456@127.0.0.1:33070/ordering'
 pnpm --filter @ordering/server exec prisma migrate deploy
 ```
 
 停止容器使用：
 
 ```powershell
-docker compose -f deploy/docker-compose.test.yml down
+docker compose -f deploy/docker-compose.yml down
 ```
 
 除非明确要丢弃全部测试数据，不要加 `-v`。
@@ -44,7 +44,7 @@ Copy-Item apps/server/.env.example apps/server/.env
 
 编辑 `apps/server/.env`：
 
-- `DATABASE_URL`：本地可使用上一节测试库地址，生产必须使用独立强密码账号。
+- `DATABASE_URL`：使用仓库 Compose 服务时填写 `mysql://ordering:123456@127.0.0.1:33070/ordering`；生产必须使用独立强密码账号。
 - `WECHAT_APP_ID` / `WECHAT_APP_SECRET`：微信公众平台的小程序凭据。
 - `OPENID_HMAC_SECRET`、`USER_SESSION_PEPPER`、`ADMIN_SESSION_SECRET`：三个彼此不同、至少 32 字符的随机值。
 - `ADMIN_USERNAME`：唯一管理员账号。
@@ -91,11 +91,11 @@ pnpm --filter @ordering/server dev
 
 ## 5. 测试和验收
 
-先确认测试 MySQL 健康并设置当前终端的 `DATABASE_URL`，再运行完整服务端门禁：
+先确认本地 MySQL 健康并设置当前终端的 `DATABASE_URL`，再运行完整服务端门禁：
 
 ```powershell
-docker compose -f deploy/docker-compose.test.yml up -d --wait
-$env:DATABASE_URL='mysql://ordering:ordering_test_password@127.0.0.1:33070/ordering_test'
+docker compose -f deploy/docker-compose.yml up -d --wait
+$env:DATABASE_URL='mysql://ordering:123456@127.0.0.1:33070/ordering'
 pnpm verify:server
 ```
 

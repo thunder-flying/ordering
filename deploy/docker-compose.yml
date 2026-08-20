@@ -1,5 +1,6 @@
 services:
-  mysql-test:
+  mysql-ordering:
+    container_name: mysql-ordering
     image: mysql:8.4
     environment:
       MYSQL_DATABASE: ordering
@@ -18,4 +19,4 @@ services:
       timeout: 2s
       retries: 30
     volumes:
-      - ./mysql-test-init:/docker-entrypoint-initdb.d:ro
+      - ./mysql-ordering-init:/docker-entrypoint-initdb.d:ro
