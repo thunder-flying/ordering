@@ -1,0 +1,1502 @@
+openapi: 3.1.0
+info:
+  title: 个人选菜清单 API
+  version: 0.1.0
+  description: |
+    原生微信小程序和单管理员 Next.js 后台共用的版本化 API。
+    所有金额均为人民币分的整数。私有资源的用户身份只能来自会话。
+  license:
+    name: Proprietary
+    identifier: LicenseRef-Proprietary
+servers:
+  - url: /
+    description: 与管理后台或小程序配置域名相同的当前服务源
+tags:
+  - name: Auth
+    description: 微信用户会话建立与退出
+  - name: Profile
+    description: 当前用户可选资料与隐私操作
+  - name: Menu
+    description: 无需认证的公共分类和菜品读取
+  - name: Favorites
+    description: 当前用户私有收藏
+  - name: Lists
+    description: 当前用户私有选菜清单
+  - name: Admin Auth
+    description: 单管理员 Cookie 会话
+  - name: Admin Stats
+    description: 不包含用户身份的聚合统计
+  - name: Admin Categories
+    description: 管理员分类维护
+  - name: Admin Dishes
+    description: 管理员菜品与图片维护
+  - name: Media
+    description: 公开菜品图片和签名头像读取
+
+paths:
+  /api/v1/auth/wechat:
+    post:
+      tags: [Auth]
+      summary: 使用 wx.login code 建立用户会话
+      operationId: loginWithWechatCode
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WechatLoginRequest'
+      responses:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WechatLoginResponse'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '502': { $ref: '#/components/responses/WechatUnavailable' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/auth/logout:
+    delete:
+      tags: [Auth]
+      summary: 删除当前用户会话
+      operationId: logoutUserSession
+      security:
+        - userBearer: []
+      responses:
+        '200':
+          description: 当前会话已删除
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionResponse'
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/profile:
+    get:
+      tags: [Profile]
+      summary: 获取当前用户资料
+      operationId: getProfile
+      security:
+        - userBearer: []
+      responses:
+        '200':
+          description: 当前用户资料
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    patch:
+      tags: [Profile]
+      summary: 修改当前用户昵称
+      operationId: updateNickname
+      security:
+        - userBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateNicknameRequest'
+      responses:
+        '200':
+          description: 更新后的资料
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/profile/avatar:
+    post:
+      tags: [Profile]
+      summary: 上传或替换当前用户头像
+      operationId: replaceAvatar
+      security:
+        - userBearer: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: JPEG、PNG 或 WebP，最大 2 MB
+      responses:
+        '200':
+          description: 更新后的资料，avatarUrl 为 10 分钟签名 URL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/profile/onboarding/complete:
+    post:
+      tags: [Profile]
+      summary: 将首次资料引导标记为完成或已跳过
+      operationId: completeProfileOnboarding
+      security:
+        - userBearer: []
+      responses:
+        '200':
+          description: 标记后的资料
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/profile/data:
+    delete:
+      tags: [Profile]
+      summary: 清空当前用户收藏和清单，保留资料与登录状态
+      operationId: clearPrivateData
+      security:
+        - userBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClearDataRequest'
+      responses:
+        '200':
+          description: 私有数据已清空
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionResponse'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/profile/account:
+    delete:
+      tags: [Profile]
+      summary: 注销当前用户账号并删除可关联的个人数据
+      operationId: deleteAccount
+      security:
+        - userBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteAccountRequest'
+      responses:
+        '200':
+          description: 账号已注销，当前令牌立即失效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionResponse'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/categories:
+    get:
+      tags: [Menu]
+      summary: 获取已启用且未删除的公共分类
+      operationId: listPublicCategories
+      security: []
+      responses:
+        '200':
+          description: 按 sortOrder、id 排序的分类
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicCategoryListResponse'
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/dishes:
+    get:
+      tags: [Menu]
+      summary: 搜索和分页获取当前可用菜品
+      operationId: listPublicDishes
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/SearchQuery'
+        - $ref: '#/components/parameters/CategoryIdQuery'
+        - $ref: '#/components/parameters/CursorQuery'
+        - $ref: '#/components/parameters/LimitQuery'
+      responses:
+        '200':
+          description: 可用菜品分页结果
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicDishPageResponse'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/dishes/availability:
+    post:
+      tags: [Menu]
+      summary: 批量刷新草稿菜品的可用状态和当前参考价格
+      operationId: resolveDishAvailability
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DishAvailabilityRequest'
+      responses:
+        '200':
+          description: 输入顺序对应的菜品状态
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DishAvailabilityResponse'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/favorites:
+    get:
+      tags: [Favorites]
+      summary: 获取当前用户仍可用的收藏菜品
+      operationId: listFavorites
+      security:
+        - userBearer: []
+      parameters:
+        - $ref: '#/components/parameters/CursorQuery'
+        - $ref: '#/components/parameters/LimitQuery'
+      responses:
+        '200':
+          description: 收藏菜品分页结果
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FavoritePageResponse'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/favorites/{dishId}:
+    parameters:
+      - $ref: '#/components/parameters/DishIdPath'
+    put:
+      tags: [Favorites]
+      summary: 幂等添加收藏
+      operationId: addFavorite
+      security:
+        - userBearer: []
+      responses:
+        '200':
+          description: 已收藏
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FavoriteMutationResponse'
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    delete:
+      tags: [Favorites]
+      summary: 幂等取消收藏
+      operationId: removeFavorite
+      security:
+        - userBearer: []
+      responses:
+        '200':
+          description: 已取消收藏
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FavoriteMutationResponse'
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/lists:
+    get:
+      tags: [Lists]
+      summary: 获取当前用户的已保存清单
+      operationId: listSavedLists
+      security:
+        - userBearer: []
+      parameters:
+        - $ref: '#/components/parameters/CursorQuery'
+        - $ref: '#/components/parameters/LimitQuery'
+      responses:
+        '200':
+          description: 按更新时间倒序的清单分页
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedListPageResponse'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    post:
+      tags: [Lists]
+      summary: 保存新的个人选菜清单
+      operationId: createSavedList
+      security:
+        - userBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveListRequest'
+      responses:
+        '201':
+          description: 已创建；相同 idempotencyKey 重试返回同一清单
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedListDetailResponse'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/lists/{listId}:
+    parameters:
+      - $ref: '#/components/parameters/ListIdPath'
+    get:
+      tags: [Lists]
+      summary: 查看本人清单快照
+      operationId: getSavedList
+      security:
+        - userBearer: []
+      responses:
+        '200':
+          description: 清单详情
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedListDetailResponse'
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    patch:
+      tags: [Lists]
+      summary: 使用当前菜品名称和价格重建本人清单
+      operationId: updateSavedList
+      security:
+        - userBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateListRequest'
+      responses:
+        '200':
+          description: 更新后的清单；相同幂等键重试返回该结果
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedListDetailResponse'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    delete:
+      tags: [Lists]
+      summary: 删除本人清单
+      operationId: deleteSavedList
+      security:
+        - userBearer: []
+      responses:
+        '200':
+          description: 清单已删除
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionResponse'
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/lists/{listId}/copy:
+    parameters:
+      - $ref: '#/components/parameters/ListIdPath'
+    post:
+      tags: [Lists]
+      summary: 使用当前可用菜品和价格复制本人清单
+      operationId: copySavedList
+      security:
+        - userBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CopyListRequest'
+      responses:
+        '201':
+          description: 已复制，并返回因下架而跳过的菜品名称
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CopyListResponse'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/admin/session:
+    post:
+      tags: [Admin Auth]
+      summary: 单管理员登录
+      operationId: loginAdmin
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminLoginRequest'
+      responses:
+        '200':
+          description: 登录成功并设置 HttpOnly Cookie
+          headers:
+            Set-Cookie:
+              schema: { type: string }
+              description: ordering_admin_session，Secure、HttpOnly、SameSite=Strict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminSessionResponse'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    get:
+      tags: [Admin Auth]
+      summary: 获取当前管理员会话及新的 CSRF 令牌
+      operationId: getAdminSession
+      security:
+        - adminSession: []
+      responses:
+        '200':
+          description: 当前管理员会话
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminSessionResponse'
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    delete:
+      tags: [Admin Auth]
+      summary: 退出管理员会话
+      operationId: logoutAdmin
+      security:
+        - adminSession: []
+          adminCsrf: []
+      responses:
+        '200':
+          description: Cookie 已失效
+          headers:
+            Set-Cookie:
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionResponse'
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/admin/stats:
+    get:
+      tags: [Admin Stats]
+      summary: 获取匿名聚合统计
+      operationId: getAdminStats
+      security:
+        - adminSession: []
+      responses:
+        '200':
+          description: 不包含用户身份和个人清单内容的聚合数据
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminStatsResponse'
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/admin/categories:
+    get:
+      tags: [Admin Categories]
+      summary: 分页获取全部未物理删除分类
+      operationId: listAdminCategories
+      security:
+        - adminSession: []
+      parameters:
+        - $ref: '#/components/parameters/CursorQuery'
+        - $ref: '#/components/parameters/LimitQuery'
+        - $ref: '#/components/parameters/IncludeDeletedQuery'
+      responses:
+        '200':
+          description: 管理分类分页
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCategoryPageResponse'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    post:
+      tags: [Admin Categories]
+      summary: 新建分类
+      operationId: createCategory
+      security:
+        - adminSession: []
+          adminCsrf: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryCreateRequest'
+      responses:
+        '201':
+          description: 已创建分类
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCategoryResponse'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/admin/categories/{categoryId}:
+    parameters:
+      - $ref: '#/components/parameters/CategoryIdPath'
+    patch:
+      tags: [Admin Categories]
+      summary: 编辑分类、排序或启用状态
+      operationId: updateCategory
+      security:
+        - adminSession: []
+          adminCsrf: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryUpdateRequest'
+      responses:
+        '200':
+          description: 已更新分类
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCategoryResponse'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    delete:
+      tags: [Admin Categories]
+      summary: 软删除无关联菜品的分类
+      operationId: deleteCategory
+      security:
+        - adminSession: []
+          adminCsrf: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OptimisticDeleteRequest'
+      responses:
+        '200':
+          description: 分类已软删除
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionResponse'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/admin/dishes:
+    get:
+      tags: [Admin Dishes]
+      summary: 搜索和分页获取管理菜品
+      operationId: listAdminDishes
+      security:
+        - adminSession: []
+      parameters:
+        - $ref: '#/components/parameters/SearchQuery'
+        - $ref: '#/components/parameters/CategoryIdQuery'
+        - $ref: '#/components/parameters/CursorQuery'
+        - $ref: '#/components/parameters/LimitQuery'
+        - $ref: '#/components/parameters/PublishedQuery'
+        - $ref: '#/components/parameters/IncludeDeletedQuery'
+      responses:
+        '200':
+          description: 管理菜品分页
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminDishPageResponse'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    post:
+      tags: [Admin Dishes]
+      summary: 新建菜品
+      operationId: createDish
+      security:
+        - adminSession: []
+          adminCsrf: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DishCreateRequest'
+      responses:
+        '201':
+          description: 已创建菜品
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminDishResponse'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/admin/dishes/{dishId}:
+    parameters:
+      - $ref: '#/components/parameters/DishIdPath'
+    patch:
+      tags: [Admin Dishes]
+      summary: 编辑菜品、参考价格、排序或上架状态
+      operationId: updateDish
+      security:
+        - adminSession: []
+          adminCsrf: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DishUpdateRequest'
+      responses:
+        '200':
+          description: 已更新菜品
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminDishResponse'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    delete:
+      tags: [Admin Dishes]
+      summary: 软删除菜品，历史清单仍保留快照
+      operationId: deleteDish
+      security:
+        - adminSession: []
+          adminCsrf: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OptimisticDeleteRequest'
+      responses:
+        '200':
+          description: 菜品已软删除
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionResponse'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/admin/uploads/dish-image:
+    post:
+      tags: [Admin Dishes]
+      summary: 上传待关联的菜品图片
+      operationId: uploadDishImage
+      security:
+        - adminSession: []
+          adminCsrf: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: JPEG、PNG 或 WebP，最大 5 MB
+      responses:
+        '201':
+          description: 图片已安全保存，返回关联 ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadResponse'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /media/dishes/{key}:
+    get:
+      tags: [Media]
+      summary: 读取公开菜品图片
+      operationId: getDishImage
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/MediaKeyPath'
+      responses:
+        '200':
+          description: 图片二进制
+          headers:
+            Cache-Control:
+              schema: { type: string }
+              description: 内容哈希 URL 使用 public immutable
+          content:
+            image/jpeg: { schema: { type: string, format: binary } }
+            image/png: { schema: { type: string, format: binary } }
+            image/webp: { schema: { type: string, format: binary } }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /media/avatars/{key}:
+    get:
+      tags: [Media]
+      summary: 使用短时签名读取私有头像
+      operationId: getSignedAvatar
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/MediaKeyPath'
+        - name: expires
+          in: query
+          required: true
+          schema: { type: integer, format: int64 }
+          description: UTC 秒级过期时间，最长为签发后 10 分钟
+        - name: signature
+          in: query
+          required: true
+          schema: { type: string, minLength: 32, maxLength: 128 }
+      responses:
+        '200':
+          description: 头像二进制，不允许共享缓存
+          headers:
+            Cache-Control:
+              schema: { const: private, type: string }
+          content:
+            image/jpeg: { schema: { type: string, format: binary } }
+            image/png: { schema: { type: string, format: binary } }
+            image/webp: { schema: { type: string, format: binary } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+components:
+  securitySchemes:
+    userBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque-random-token
+      description: wx.login 换取的随机令牌，最长有效 30 天
+    adminSession:
+      type: apiKey
+      in: cookie
+      name: ordering_admin_session
+    adminCsrf:
+      type: apiKey
+      in: header
+      name: X-CSRF-Token
+
+  parameters:
+    CursorQuery:
+      name: cursor
+      in: query
+      required: false
+      schema: { type: string, minLength: 1, maxLength: 64 }
+    LimitQuery:
+      name: limit
+      in: query
+      required: false
+      schema: { type: integer, minimum: 1, maximum: 50, default: 20 }
+    SearchQuery:
+      name: q
+      in: query
+      required: false
+      schema: { type: string, maxLength: 40, default: '' }
+    CategoryIdQuery:
+      name: categoryId
+      in: query
+      required: false
+      schema: { $ref: '#/components/schemas/ResourceId' }
+    PublishedQuery:
+      name: published
+      in: query
+      required: false
+      schema: { type: boolean }
+    IncludeDeletedQuery:
+      name: includeDeleted
+      in: query
+      required: false
+      schema: { type: boolean, default: false }
+    DishIdPath:
+      name: dishId
+      in: path
+      required: true
+      schema: { $ref: '#/components/schemas/ResourceId' }
+    CategoryIdPath:
+      name: categoryId
+      in: path
+      required: true
+      schema: { $ref: '#/components/schemas/ResourceId' }
+    ListIdPath:
+      name: listId
+      in: path
+      required: true
+      schema: { $ref: '#/components/schemas/ResourceId' }
+    MediaKeyPath:
+      name: key
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^[A-Za-z0-9_-]{32,128}\.(jpg|png|webp)$'
+
+  responses:
+    ValidationError:
+      description: 请求字段不符合契约
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    Unauthenticated:
+      description: 会话缺失、无效或过期
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    Forbidden:
+      description: 已认证但禁止执行
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    NotFound:
+      description: 资源不存在或当前用户无权感知
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    Conflict:
+      description: 并发版本或业务状态冲突
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    RateLimited:
+      description: 请求频率超过限制
+      headers:
+        Retry-After:
+          schema: { type: integer, minimum: 1 }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    WechatUnavailable:
+      description: 微信登录服务暂时不可用
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    InternalError:
+      description: 未预期服务端错误
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  schemas:
+    ResourceId:
+      type: string
+      minLength: 20
+      maxLength: 32
+      pattern: '^[a-z0-9]+$'
+      examples: [cm1234567890abcdefghijk]
+    DateTime:
+      type: string
+      format: date-time
+      examples: ['2026-08-20T08:00:00.000Z']
+    NonNegativeCents:
+      type: integer
+      format: int32
+      minimum: 0
+      maximum: 9999999
+    ApiErrorCode:
+      type: string
+      enum:
+        - VALIDATION_ERROR
+        - UNAUTHENTICATED
+        - FORBIDDEN
+        - NOT_FOUND
+        - CONFLICT
+        - RATE_LIMITED
+        - WECHAT_UNAVAILABLE
+        - INTERNAL_ERROR
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, error]
+      properties:
+        ok: { const: false, type: boolean }
+        error:
+          type: object
+          additionalProperties: false
+          required: [code, message, requestId]
+          properties:
+            code: { $ref: '#/components/schemas/ApiErrorCode' }
+            message: { type: string, minLength: 1, maxLength: 200 }
+            requestId: { type: string, minLength: 1, maxLength: 64 }
+    ActionResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data]
+      properties:
+        ok: { const: true, type: boolean }
+        data:
+          type: object
+          additionalProperties: false
+          required: [success]
+          properties:
+            success: { const: true, type: boolean }
+
+    WechatLoginRequest:
+      type: object
+      additionalProperties: false
+      required: [code]
+      properties:
+        code: { type: string, minLength: 1, maxLength: 128 }
+    AuthSession:
+      type: object
+      additionalProperties: false
+      required: [token, expiresAt, profileComplete, onboardingCompleted]
+      properties:
+        token: { type: string, minLength: 32, maxLength: 128 }
+        expiresAt: { $ref: '#/components/schemas/DateTime' }
+        profileComplete: { type: boolean }
+        onboardingCompleted: { type: boolean }
+    WechatLoginResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data]
+      properties:
+        ok: { const: true, type: boolean }
+        data: { $ref: '#/components/schemas/AuthSession' }
+
+    Profile:
+      type: object
+      additionalProperties: false
+      required: [nickname, avatarUrl, profileComplete, onboardingCompleted]
+      properties:
+        nickname: { type: string, minLength: 1, maxLength: 40, default: 微信用户 }
+        avatarUrl:
+          oneOf:
+            - type: string
+              format: uri
+            - type: 'null'
+        profileComplete: { type: boolean, description: 头像和非默认昵称均存在时为 true }
+        onboardingCompleted: { type: boolean }
+    ProfileResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data]
+      properties:
+        ok: { const: true, type: boolean }
+        data: { $ref: '#/components/schemas/Profile' }
+    UpdateNicknameRequest:
+      type: object
+      additionalProperties: false
+      required: [nickname]
+      properties:
+        nickname: { type: string, minLength: 1, maxLength: 40 }
+    ClearDataRequest:
+      type: object
+      additionalProperties: false
+      required: [confirmation]
+      properties:
+        confirmation: { const: CLEAR_MY_LISTS_AND_FAVORITES, type: string }
+    DeleteAccountRequest:
+      type: object
+      additionalProperties: false
+      required: [confirmation]
+      properties:
+        confirmation: { const: DELETE_MY_ACCOUNT, type: string }
+
+    PublicCategory:
+      type: object
+      additionalProperties: false
+      required: [id, name, sortOrder]
+      properties:
+        id: { $ref: '#/components/schemas/ResourceId' }
+        name: { type: string, minLength: 1, maxLength: 20 }
+        sortOrder: { type: integer, minimum: 0, maximum: 9999 }
+    PublicCategoryListResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data]
+      properties:
+        ok: { const: true, type: boolean }
+        data:
+          type: object
+          additionalProperties: false
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/PublicCategory' }
+
+    PublicDish:
+      type: object
+      additionalProperties: false
+      required: [id, categoryId, name, description, imageUrl, referencePriceCents, sortOrder]
+      properties:
+        id: { $ref: '#/components/schemas/ResourceId' }
+        categoryId: { $ref: '#/components/schemas/ResourceId' }
+        name: { type: string, minLength: 1, maxLength: 40 }
+        description: { type: string, maxLength: 300 }
+        imageUrl: { type: string, format: uri }
+        referencePriceCents: { $ref: '#/components/schemas/NonNegativeCents' }
+        sortOrder: { type: integer, minimum: 0, maximum: 9999 }
+    PublicDishPageResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data]
+      properties:
+        ok: { const: true, type: boolean }
+        data:
+          type: object
+          additionalProperties: false
+          required: [items, nextCursor]
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/PublicDish' }
+            nextCursor:
+              oneOf:
+                - { $ref: '#/components/schemas/ResourceId' }
+                - type: 'null'
+    DishAvailabilityRequest:
+      type: object
+      additionalProperties: false
+      required: [dishIds]
+      properties:
+        dishIds:
+          type: array
+          minItems: 1
+          maxItems: 100
+          uniqueItems: true
+          items: { $ref: '#/components/schemas/ResourceId' }
+    DishAvailabilityItem:
+      oneOf:
+        - type: object
+          additionalProperties: false
+          required: [dishId, available, dish]
+          properties:
+            dishId: { $ref: '#/components/schemas/ResourceId' }
+            available: { const: true, type: boolean }
+            dish: { $ref: '#/components/schemas/PublicDish' }
+        - type: object
+          additionalProperties: false
+          required: [dishId, available]
+          properties:
+            dishId: { $ref: '#/components/schemas/ResourceId' }
+            available: { const: false, type: boolean }
+    DishAvailabilityResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data]
+      properties:
+        ok: { const: true, type: boolean }
+        data:
+          type: object
+          additionalProperties: false
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/DishAvailabilityItem' }
+
+    FavoritePageResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data]
+      properties:
+        ok: { const: true, type: boolean }
+        data:
+          type: object
+          additionalProperties: false
+          required: [items, nextCursor]
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/PublicDish' }
+            nextCursor:
+              oneOf:
+                - { $ref: '#/components/schemas/ResourceId' }
+                - type: 'null'
+    FavoriteMutationResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data]
+      properties:
+        ok: { const: true, type: boolean }
+        data:
+          type: object
+          additionalProperties: false
+          required: [dishId, favorited]
+          properties:
+            dishId: { $ref: '#/components/schemas/ResourceId' }
+            favorited: { type: boolean }
+
+    ListItemInput:
+      type: object
+      additionalProperties: false
+      required: [dishId, quantity, note]
+      properties:
+        dishId: { $ref: '#/components/schemas/ResourceId' }
+        quantity: { type: integer, minimum: 1, maximum: 99 }
+        note: { type: string, maxLength: 100, default: '' }
+    SaveListRequest:
+      type: object
+      additionalProperties: false
+      required: [name, idempotencyKey, items]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 40 }
+        idempotencyKey: { type: string, format: uuid }
+        items:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items: { $ref: '#/components/schemas/ListItemInput' }
+    UpdateListRequest:
+      allOf:
+        - { $ref: '#/components/schemas/SaveListRequest' }
+        - type: object
+          required: [expectedUpdatedAt]
+          properties:
+            expectedUpdatedAt: { $ref: '#/components/schemas/DateTime' }
+    CopyListRequest:
+      type: object
+      additionalProperties: false
+      required: [name, idempotencyKey]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 40 }
+        idempotencyKey: { type: string, format: uuid }
+    SavedListSummary:
+      type: object
+      additionalProperties: false
+      required: [id, name, itemCount, totalCents, createdAt, updatedAt]
+      properties:
+        id: { $ref: '#/components/schemas/ResourceId' }
+        name: { type: string, minLength: 1, maxLength: 40 }
+        itemCount: { type: integer, minimum: 1, maximum: 100 }
+        totalCents: { type: integer, minimum: 0, maximum: 989999901 }
+        createdAt: { $ref: '#/components/schemas/DateTime' }
+        updatedAt: { $ref: '#/components/schemas/DateTime' }
+    SavedListItem:
+      type: object
+      additionalProperties: false
+      required: [dishId, nameSnapshot, referencePriceCentsSnapshot, quantity, note, position, currentlyAvailable]
+      properties:
+        dishId:
+          oneOf:
+            - { $ref: '#/components/schemas/ResourceId' }
+            - type: 'null'
+        nameSnapshot: { type: string, minLength: 1, maxLength: 40 }
+        referencePriceCentsSnapshot: { $ref: '#/components/schemas/NonNegativeCents' }
+        quantity: { type: integer, minimum: 1, maximum: 99 }
+        note: { type: string, maxLength: 100 }
+        position: { type: integer, minimum: 0, maximum: 99 }
+        currentlyAvailable: { type: boolean }
+    SavedListDetail:
+      allOf:
+        - { $ref: '#/components/schemas/SavedListSummary' }
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              minItems: 1
+              maxItems: 100
+              items: { $ref: '#/components/schemas/SavedListItem' }
+    SavedListPageResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data]
+      properties:
+        ok: { const: true, type: boolean }
+        data:
+          type: object
+          additionalProperties: false
+          required: [items, nextCursor]
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/SavedListSummary' }
+            nextCursor:
+              oneOf:
+                - { $ref: '#/components/schemas/ResourceId' }
+                - type: 'null'
+    SavedListDetailResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data]
+      properties:
+        ok: { const: true, type: boolean }
+        data: { $ref: '#/components/schemas/SavedListDetail' }
+    CopyListResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data]
+      properties:
+        ok: { const: true, type: boolean }
+        data:
+          type: object
+          additionalProperties: false
+          required: [list, skippedItemNames]
+          properties:
+            list: { $ref: '#/components/schemas/SavedListDetail' }
+            skippedItemNames:
+              type: array
+              maxItems: 100
+              items: { type: string, minLength: 1, maxLength: 40 }
+
+    AdminLoginRequest:
+      type: object
+      additionalProperties: false
+      required: [username, password]
+      properties:
+        username: { type: string, minLength: 1, maxLength: 64 }
+        password: { type: string, minLength: 1, maxLength: 256, format: password }
+    AdminSession:
+      type: object
+      additionalProperties: false
+      required: [csrfToken, expiresAt]
+      properties:
+        csrfToken: { type: string, minLength: 32, maxLength: 128 }
+        expiresAt: { $ref: '#/components/schemas/DateTime' }
+    AdminSessionResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data]
+      properties:
+        ok: { const: true, type: boolean }
+        data: { $ref: '#/components/schemas/AdminSession' }
+
+    TopDishStat:
+      type: object
+      additionalProperties: false
+      required: [dishId, dishName, favoriteCount]
+      properties:
+        dishId: { $ref: '#/components/schemas/ResourceId' }
+        dishName: { type: string, minLength: 1, maxLength: 40 }
+        favoriteCount: { type: integer, minimum: 0 }
+    AdminStats:
+      type: object
+      additionalProperties: false
+      required: [userCount, activeUsers7d, favoriteCount, listCount, topDishes]
+      properties:
+        userCount: { type: integer, minimum: 0 }
+        activeUsers7d: { type: integer, minimum: 0 }
+        favoriteCount: { type: integer, minimum: 0 }
+        listCount: { type: integer, minimum: 0 }
+        topDishes:
+          type: array
+          maxItems: 10
+          items: { $ref: '#/components/schemas/TopDishStat' }
+    AdminStatsResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data]
+      properties:
+        ok: { const: true, type: boolean }
+        data: { $ref: '#/components/schemas/AdminStats' }
+
+    CategoryCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [name, sortOrder, enabled]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 20 }
+        sortOrder: { type: integer, minimum: 0, maximum: 9999 }
+        enabled: { type: boolean }
+    CategoryUpdateRequest:
+      allOf:
+        - { $ref: '#/components/schemas/CategoryCreateRequest' }
+        - type: object
+          required: [expectedUpdatedAt]
+          properties:
+            expectedUpdatedAt: { $ref: '#/components/schemas/DateTime' }
+    OptimisticDeleteRequest:
+      type: object
+      additionalProperties: false
+      required: [expectedUpdatedAt]
+      properties:
+        expectedUpdatedAt: { $ref: '#/components/schemas/DateTime' }
+    AdminCategory:
+      type: object
+      additionalProperties: false
+      required: [id, name, sortOrder, enabled, dishCount, createdAt, updatedAt, deletedAt]
+      properties:
+        id: { $ref: '#/components/schemas/ResourceId' }
+        name: { type: string, minLength: 1, maxLength: 20 }
+        sortOrder: { type: integer, minimum: 0, maximum: 9999 }
+        enabled: { type: boolean }
+        dishCount: { type: integer, minimum: 0 }
+        createdAt: { $ref: '#/components/schemas/DateTime' }
+        updatedAt: { $ref: '#/components/schemas/DateTime' }
+        deletedAt:
+          oneOf:
+            - { $ref: '#/components/schemas/DateTime' }
+            - type: 'null'
+    AdminCategoryResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data]
+      properties:
+        ok: { const: true, type: boolean }
+        data: { $ref: '#/components/schemas/AdminCategory' }
+    AdminCategoryPageResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data]
+      properties:
+        ok: { const: true, type: boolean }
+        data:
+          type: object
+          additionalProperties: false
+          required: [items, nextCursor]
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/AdminCategory' }
+            nextCursor:
+              oneOf:
+                - { $ref: '#/components/schemas/ResourceId' }
+                - type: 'null'
+
+    DishCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [categoryId, name, description, referencePriceCents, imageUploadId, sortOrder, published]
+      properties:
+        categoryId: { $ref: '#/components/schemas/ResourceId' }
+        name: { type: string, minLength: 1, maxLength: 40 }
+        description: { type: string, maxLength: 300 }
+        referencePriceCents: { $ref: '#/components/schemas/NonNegativeCents' }
+        imageUploadId: { $ref: '#/components/schemas/ResourceId' }
+        sortOrder: { type: integer, minimum: 0, maximum: 9999 }
+        published: { type: boolean }
+    DishUpdateRequest:
+      allOf:
+        - { $ref: '#/components/schemas/DishCreateRequest' }
+        - type: object
+          required: [expectedUpdatedAt]
+          properties:
+            expectedUpdatedAt: { $ref: '#/components/schemas/DateTime' }
+    AdminDish:
+      type: object
+      additionalProperties: false
+      required: [id, categoryId, categoryName, name, description, referencePriceCents, imageUrl, imageUploadId, sortOrder, published, createdAt, updatedAt, deletedAt]
+      properties:
+        id: { $ref: '#/components/schemas/ResourceId' }
+        categoryId: { $ref: '#/components/schemas/ResourceId' }
+        categoryName: { type: string, minLength: 1, maxLength: 20 }
+        name: { type: string, minLength: 1, maxLength: 40 }
+        description: { type: string, maxLength: 300 }
+        referencePriceCents: { $ref: '#/components/schemas/NonNegativeCents' }
+        imageUrl: { type: string, format: uri }
+        imageUploadId: { $ref: '#/components/schemas/ResourceId' }
+        sortOrder: { type: integer, minimum: 0, maximum: 9999 }
+        published: { type: boolean }
+        createdAt: { $ref: '#/components/schemas/DateTime' }
+        updatedAt: { $ref: '#/components/schemas/DateTime' }
+        deletedAt:
+          oneOf:
+            - { $ref: '#/components/schemas/DateTime' }
+            - type: 'null'
+    AdminDishResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data]
+      properties:
+        ok: { const: true, type: boolean }
+        data: { $ref: '#/components/schemas/AdminDish' }
+    AdminDishPageResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data]
+      properties:
+        ok: { const: true, type: boolean }
+        data:
+          type: object
+          additionalProperties: false
+          required: [items, nextCursor]
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/AdminDish' }
+            nextCursor:
+              oneOf:
+                - { $ref: '#/components/schemas/ResourceId' }
+                - type: 'null'
+
+    Upload:
+      type: object
+      additionalProperties: false
+      required: [id, mediaType, bytes, previewUrl]
+      properties:
+        id: { $ref: '#/components/schemas/ResourceId' }
+        mediaType: { type: string, enum: [image/jpeg, image/png, image/webp] }
+        bytes: { type: integer, minimum: 1, maximum: 5242880 }
+        previewUrl: { type: string, format: uri }
+    UploadResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data]
+      properties:
+        ok: { const: true, type: boolean }
+        data: { $ref: '#/components/schemas/Upload' }
