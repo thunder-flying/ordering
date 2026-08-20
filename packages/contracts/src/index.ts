@@ -18,6 +18,12 @@ export {
   SaveListInput,
   UpdateListInput,
 } from "./lists";
+export {
+  ClearPrivateDataInput,
+  DeleteAccountInput,
+  UpdateNicknameInput,
+} from "./profile";
+export type { ProfileDto, UpdateNicknameDto } from "./profile";
 export type {
   CopyListDto,
   CopyListResultDto,

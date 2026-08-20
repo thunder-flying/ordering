@@ -1069,7 +1069,7 @@ components:
         avatarUrl:
           oneOf:
             - type: string
-              format: uri
+              format: uri-reference
             - type: 'null'
         profileComplete: { type: boolean, description: 头像和非默认昵称均存在时为 true }
         onboardingCompleted: { type: boolean }
