@@ -1,0 +1,14 @@
+node_modules/
+.pnpm-store/
+.next/
+coverage/
+test-results/
+playwright-report/
+var/uploads/
+.worktrees/
+
+.env*
+!.env.example
+
+project.private.config.json
+*.log

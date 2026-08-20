@@ -1,0 +1,9 @@
+export type ApiErrorCode =
+  | "VALIDATION_ERROR"
+  | "UNAUTHENTICATED"
+  | "FORBIDDEN"
+  | "NOT_FOUND"
+  | "CONFLICT"
+  | "RATE_LIMITED"
+  | "WECHAT_UNAVAILABLE"
+  | "INTERNAL_ERROR";

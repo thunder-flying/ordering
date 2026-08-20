@@ -6,7 +6,7 @@
 
 **Architecture:** A pnpm workspace contains a shared API contract/validation package and one Next.js App Router application. Route Handlers call focused domain services, services use Prisma repositories, and all private queries derive ownership from authenticated sessions rather than request-supplied user IDs.
 
-**Tech Stack:** Node.js 24 LTS, pnpm 10, TypeScript 5, Next.js 16, React 19, Prisma 7, MySQL 8.4, Zod 4, Vitest, Playwright, Docker Compose for the test database.
+**Tech Stack:** Node.js 24 LTS, pnpm 11.19, TypeScript 5, Next.js 16, React 19, Prisma 7, MySQL 8.4, Zod 4, Vitest, Playwright, Docker Compose for the test database.
 
 **Spec:** `docs/superpowers/specs/2026-08-19-personal-menu-list-design.md`
 
@@ -84,7 +84,7 @@ Each Route Handler may parse HTTP and call one service. It must not contain Pris
 {
   "name": "personal-menu-list",
   "private": true,
-  "packageManager": "pnpm@10",
+  "packageManager": "pnpm@11.19.0",
   "scripts": {
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
