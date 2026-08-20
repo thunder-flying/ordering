@@ -14,4 +14,17 @@ const EnvSchema = z.object({
   UPLOAD_ROOT: z.string().min(1),
 });
 
-export const env = EnvSchema.parse(process.env);
+type Env = z.infer<typeof EnvSchema>;
+
+let cachedEnv: Env | undefined;
+
+export function getEnv(): Env {
+  cachedEnv ??= EnvSchema.parse(process.env);
+  return cachedEnv;
+}
+
+export const env = new Proxy({} as Env, {
+  get(_target, property: keyof Env) {
+    return getEnv()[property];
+  },
+});
