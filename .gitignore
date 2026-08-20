@@ -13,5 +13,7 @@ var/uploads/
 project.private.config.json
 *.log
 *.tsbuildinfo
+.playwright-server.pid
 apps/server/src/generated/prisma/
 apps/server/dist-cli/
+apps/server/test-e2e-uploads/
