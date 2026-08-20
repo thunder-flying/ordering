@@ -1246,12 +1246,18 @@ components:
           maxItems: 100
           items: { $ref: '#/components/schemas/ListItemInput' }
     UpdateListRequest:
-      allOf:
-        - { $ref: '#/components/schemas/SaveListRequest' }
-        - type: object
-          required: [expectedUpdatedAt]
-          properties:
-            expectedUpdatedAt: { $ref: '#/components/schemas/DateTime' }
+      type: object
+      additionalProperties: false
+      required: [name, idempotencyKey, items, expectedUpdatedAt]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 40 }
+        idempotencyKey: { type: string, format: uuid }
+        items:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items: { $ref: '#/components/schemas/ListItemInput' }
+        expectedUpdatedAt: { $ref: '#/components/schemas/DateTime' }
     CopyListRequest:
       type: object
       additionalProperties: false
@@ -1286,16 +1292,21 @@ components:
         position: { type: integer, minimum: 0, maximum: 99 }
         currentlyAvailable: { type: boolean }
     SavedListDetail:
-      allOf:
-        - { $ref: '#/components/schemas/SavedListSummary' }
-        - type: object
-          required: [items]
-          properties:
-            items:
-              type: array
-              minItems: 1
-              maxItems: 100
-              items: { $ref: '#/components/schemas/SavedListItem' }
+      type: object
+      additionalProperties: false
+      required: [id, name, itemCount, totalCents, createdAt, updatedAt, items]
+      properties:
+        id: { $ref: '#/components/schemas/ResourceId' }
+        name: { type: string, minLength: 1, maxLength: 40 }
+        itemCount: { type: integer, minimum: 1, maximum: 100 }
+        totalCents: { type: integer, minimum: 0, maximum: 989999901 }
+        createdAt: { $ref: '#/components/schemas/DateTime' }
+        updatedAt: { $ref: '#/components/schemas/DateTime' }
+        items:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items: { $ref: '#/components/schemas/SavedListItem' }
     SavedListPageResponse:
       type: object
       additionalProperties: false
