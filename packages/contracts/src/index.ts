@@ -24,6 +24,7 @@ export {
   UpdateNicknameInput,
 } from "./profile";
 export type { ProfileDto, UpdateNicknameDto } from "./profile";
+export type { AdminStatsDto, TopDishStatDto } from "./stats";
 export type {
   CopyListDto,
   CopyListResultDto,
