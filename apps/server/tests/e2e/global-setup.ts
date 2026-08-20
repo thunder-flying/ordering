@@ -2,9 +2,28 @@ import { spawn } from "node:child_process";
 import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
+import { resetTestDatabase } from "../helpers/reset-test-database";
+
 const pidFile = resolve(".playwright-server.pid");
+const testEnvironment = {
+  ADMIN_PASSWORD_HASH:
+    "$argon2id$v=19$m=19456,t=2,p=1$zWKAy+nBBjCUzzgGR22guQ$S2EfXHtB+HQilWjVG7zi1z/dLiyUQi/hYgy1IdB6Aok",
+  ADMIN_SESSION_SECRET: "test-admin-session-secret-32-chars",
+  ADMIN_USERNAME: "admin",
+  DATABASE_URL:
+    "mysql://ordering:ordering_test_password@127.0.0.1:33070/ordering_test",
+  NO_PROXY: "localhost,127.0.0.1",
+  OPENID_HMAC_SECRET: "test-openid-hmac-secret-32-chars!",
+  UPLOAD_ROOT: "./test-e2e-uploads",
+  USER_SESSION_PEPPER: "test-user-session-pepper-32-chars!",
+  WECHAT_APP_ID: "test-app-id",
+  WECHAT_APP_SECRET: "test-app-secret",
+};
 
 export default async function globalSetup() {
+  Object.assign(process.env, testEnvironment);
+  await resetTestDatabase(testEnvironment.DATABASE_URL);
+
   const server = spawn(
     process.execPath,
     [
@@ -19,18 +38,7 @@ export default async function globalSetup() {
       cwd: process.cwd(),
       env: {
         ...process.env,
-        ADMIN_PASSWORD_HASH:
-          "$argon2id$v=19$m=19456,t=2,p=1$zWKAy+nBBjCUzzgGR22guQ$S2EfXHtB+HQilWjVG7zi1z/dLiyUQi/hYgy1IdB6Aok",
-        ADMIN_SESSION_SECRET: "test-admin-session-secret-32-chars",
-        ADMIN_USERNAME: "admin",
-        DATABASE_URL:
-          "mysql://ordering:ordering_test_password@127.0.0.1:33070/ordering_test",
-        NO_PROXY: "localhost,127.0.0.1",
-        OPENID_HMAC_SECRET: "test-openid-hmac-secret-32-chars!",
-        UPLOAD_ROOT: "./test-e2e-uploads",
-        USER_SESSION_PEPPER: "test-user-session-pepper-32-chars!",
-        WECHAT_APP_ID: "test-app-id",
-        WECHAT_APP_SECRET: "test-app-secret",
+        ...testEnvironment,
       },
       stdio: "inherit",
       windowsHide: true,

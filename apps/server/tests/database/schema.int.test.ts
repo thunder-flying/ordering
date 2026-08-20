@@ -1,10 +1,10 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { prisma } from "../../src/lib/prisma";
 import { resetDatabase, seedUserAndDish } from "../helpers/database";
 
 describe("database constraints", () => {
-  afterEach(async () => {
+  beforeEach(async () => {
     await resetDatabase();
   });
 

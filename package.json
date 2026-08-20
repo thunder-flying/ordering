@@ -6,6 +6,7 @@
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "verify:server": "pnpm --filter @ordering/contracts test && pnpm --filter @ordering/server lint && pnpm --filter @ordering/server typecheck && pnpm --filter @ordering/server test && pnpm --filter @ordering/server test:integration && pnpm --filter @ordering/server build"
   }
 }

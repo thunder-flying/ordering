@@ -9,7 +9,11 @@ services:
     ports:
       - "127.0.0.1:33070:3306"
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test:
+        [
+          "CMD-SHELL",
+          "mysql --protocol=TCP -h 127.0.0.1 -uordering -pordering_test_password ordering_test -e 'SELECT 1' >/dev/null 2>&1",
+        ]
       interval: 2s
       timeout: 2s
       retries: 30
