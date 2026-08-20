@@ -10,7 +10,7 @@ import type {
 import { ApiError } from "../../lib/http/api-error";
 import { prisma } from "../../lib/prisma";
 
-const publicDishWhere = {
+export const PUBLIC_DISH_WHERE = {
   category: { is: { deletedAt: null, enabled: true } },
   deletedAt: null,
   imageUpload: { is: { referenceState: "REFERENCED" as const } },
@@ -21,7 +21,7 @@ function imageUrl(storageKey: string): string {
   return `/media/dishes/${encodeURIComponent(storageKey)}`;
 }
 
-function toPublicDish(dish: {
+export function toPublicDishDto(dish: {
   categoryId: string;
   description: string;
   id: string;
@@ -96,7 +96,7 @@ export async function searchPublicDishes(input: DishSearchDto): Promise<{
   const rows = await prisma.dish.findMany({
     where: {
       AND: [
-        publicDishWhere,
+        PUBLIC_DISH_WHERE,
         afterCursor,
         input.categoryId ? { categoryId: input.categoryId } : {},
         input.q ? { name: { contains: input.q } } : {},
@@ -119,7 +119,7 @@ export async function searchPublicDishes(input: DishSearchDto): Promise<{
     take: input.limit + 1,
   });
   const hasNextPage = rows.length > input.limit;
-  const page = rows.slice(0, input.limit).map(toPublicDish);
+  const page = rows.slice(0, input.limit).map(toPublicDishDto);
 
   return {
     items: page,
@@ -131,7 +131,7 @@ export async function resolveDishAvailability(
   dishIds: string[],
 ): Promise<DishAvailabilityDto[]> {
   const rows = await prisma.dish.findMany({
-    where: { AND: [publicDishWhere, { id: { in: dishIds } }] },
+    where: { AND: [PUBLIC_DISH_WHERE, { id: { in: dishIds } }] },
     select: {
       categoryId: true,
       description: true,
@@ -142,7 +142,7 @@ export async function resolveDishAvailability(
       sortOrder: true,
     },
   });
-  const byId = new Map(rows.map((row) => [row.id, toPublicDish(row)]));
+  const byId = new Map(rows.map((row) => [row.id, toPublicDishDto(row)]));
 
   return dishIds.map((dishId) => {
     const dish = byId.get(dishId);

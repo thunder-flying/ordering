@@ -10,6 +10,8 @@ export type {
   DishUpdateDto,
   UploadDto,
 } from "./dishes";
+export { FavoriteSearch } from "./favorites";
+export type { FavoriteMutationDto, FavoriteSearchDto } from "./favorites";
 export {
   AdminCategorySearch,
   CategoryInput,
