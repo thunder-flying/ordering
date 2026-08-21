@@ -1,15 +1,14 @@
 import {
   AdminCategorySearch,
   CategoryInput,
-  apiSuccess,
 } from "@ordering/contracts";
-import { NextResponse } from "next/server";
 
 import { route } from "../../../../../lib/http/handler";
 import {
   parseJson,
   parseSearchParams,
 } from "../../../../../lib/http/json";
+import { jsonSuccess } from "../../../../../lib/http/response";
 import { requireAdmin } from "../../../../../modules/admin/require-admin";
 import {
   createCategory,
@@ -28,7 +27,7 @@ export const GET = route(async (request) => {
 export const POST = route(async (request) => {
   await requireAdmin(request);
   const input = await parseJson(request, CategoryInput);
-  return NextResponse.json(apiSuccess(await createCategory(input)), {
+  return jsonSuccess(await createCategory(input), {
     status: 201,
   });
 });

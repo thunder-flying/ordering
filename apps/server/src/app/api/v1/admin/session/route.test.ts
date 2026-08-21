@@ -48,7 +48,8 @@ describe("/api/v1/admin/session", () => {
       "ordering_admin_session=encrypted",
     );
     expect(await response.json()).toEqual({
-      ok: true,
+      code: 200,
+      message: "success",
       data: {
         csrfToken: "c".repeat(43),
         expiresAt: "2026-08-20T12:00:00.000Z",
@@ -67,7 +68,8 @@ describe("/api/v1/admin/session", () => {
     const response = await GET(request);
 
     expect(await response.json()).toEqual({
-      ok: true,
+      code: 200,
+      message: "success",
       data: {
         csrfToken: "d".repeat(43),
         expiresAt: new Date(1_787_227_200 * 1_000).toISOString(),
@@ -92,7 +94,8 @@ describe("/api/v1/admin/session", () => {
 
     expect(response.headers.get("set-cookie")).toContain("Max-Age=0");
     expect(await response.json()).toEqual({
-      ok: true,
+      code: 200,
+      message: "success",
       data: { success: true },
     });
   });

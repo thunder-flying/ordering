@@ -29,7 +29,8 @@ describe("DELETE /api/v1/auth/logout", () => {
 
     expect(revokeUserSession).toHaveBeenCalledWith("session-1");
     expect(await response.json()).toEqual({
-      ok: true,
+      code: 200,
+      message: "success",
       data: { success: true },
     });
   });

@@ -18,7 +18,8 @@ describe("GET /api/v1/dishes", () => {
 
     expect(searchPublicDishes).toHaveBeenCalledWith({ q: "番茄", limit: 5 });
     expect(await response.json()).toEqual({
-      ok: true,
+      code: 200,
+      message: "success",
       data: { items: [], nextCursor: null },
     });
   });

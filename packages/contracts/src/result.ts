@@ -1,27 +1,22 @@
-import type { ApiErrorCode } from "./errors";
-
-export type ApiResult<T> =
-  | { ok: true; data: T }
+export type ApiResponse<T> =
   | {
-      ok: false;
-      error: {
-        code: ApiErrorCode;
-        message: string;
-        requestId: string;
-      };
+      code: number;
+      message: "success";
+      data: T;
+    }
+  | {
+      code: number;
+      message: string;
+      data: null;
     };
 
-export function apiSuccess<T>(data: T): ApiResult<T> {
-  return { ok: true, data };
+export function apiSuccess<T>(data: T, status = 200): ApiResponse<T> {
+  return { code: status, message: "success", data };
 }
 
 export function apiFailure(
-  code: ApiErrorCode,
+  status: number,
   message: string,
-  requestId: string,
-): ApiResult<never> {
-  return {
-    ok: false,
-    error: { code, message, requestId },
-  };
+): ApiResponse<never> {
+  return { code: status, message, data: null };
 }

@@ -34,5 +34,15 @@ describe("POST /api/v1/admin/uploads/dish-image", () => {
     expect(requireAdmin).toHaveBeenCalledWith(request);
     expect(storeDishImage).toHaveBeenCalledWith(expect.any(File));
     expect(response.status).toBe(201);
+    expect(await response.json()).toEqual({
+      code: 201,
+      message: "success",
+      data: {
+        bytes: 68,
+        id: "upload-1",
+        mediaType: "image/png",
+        previewUrl: "/media/dishes/key.png",
+      },
+    });
   });
 });

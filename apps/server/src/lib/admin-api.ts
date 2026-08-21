@@ -1,15 +1,44 @@
-import type { ApiErrorCode, ApiResult } from "@ordering/contracts";
+import type { ApiResponse } from "@ordering/contracts";
 
 export class AdminApiError extends Error {
-  readonly code: ApiErrorCode;
+  readonly code: number;
+  readonly requestId: string | null;
   readonly status: number;
 
-  constructor(code: ApiErrorCode, message: string, status: number) {
+  constructor(
+    code: number,
+    message: string,
+    status: number,
+    requestId: string | null = null,
+  ) {
     super(message);
     this.name = "AdminApiError";
     this.code = code;
+    this.requestId = requestId;
     this.status = status;
   }
+}
+
+function hasApiResponseShape(value: unknown): value is ApiResponse<unknown> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "code" in value &&
+    Number.isInteger(value.code) &&
+    "message" in value &&
+    typeof value.message === "string" &&
+    value.message.length > 0 &&
+    "data" in value
+  );
+}
+
+function invalidResponse(response: Response, requestId: string | null) {
+  return new AdminApiError(
+    response.status,
+    "服务响应格式不正确",
+    response.status,
+    requestId,
+  );
 }
 
 export async function adminFetch<T>(
@@ -30,13 +59,32 @@ export async function adminFetch<T>(
     credentials: "same-origin",
     headers,
   });
-  const payload = (await response.json()) as ApiResult<T>;
-  if (!payload.ok) {
+  const requestId = response.headers.get("x-request-id");
+  let payload: unknown;
+  try {
+    payload = await response.json();
+  } catch {
+    throw invalidResponse(response, requestId);
+  }
+
+  if (!hasApiResponseShape(payload) || payload.code !== response.status) {
+    throw invalidResponse(response, requestId);
+  }
+
+  if (!response.ok) {
+    if (payload.data !== null || payload.message === "success") {
+      throw invalidResponse(response, requestId);
+    }
     throw new AdminApiError(
-      payload.error.code,
-      payload.error.message,
+      payload.code,
+      payload.message,
       response.status,
+      requestId,
     );
   }
-  return payload.data;
+
+  if (payload.message !== "success") {
+    throw invalidResponse(response, requestId);
+  }
+  return payload.data as T;
 }

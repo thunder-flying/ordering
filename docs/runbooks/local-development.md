@@ -67,11 +67,11 @@ node -e "console.log(require('node:crypto').randomBytes(32).toString('base64url'
 $orderingSecurePassword = Read-Host '管理员密码' -AsSecureString
 $orderingCredential = [PSCredential]::new('admin', $orderingSecurePassword)
 $env:ORDERING_ADMIN_PASSWORD = $orderingCredential.GetNetworkCredential().Password
-pnpm --filter @ordering/server exec node --input-type=module -e "import { hash } from '@node-rs/argon2'; console.log(await hash(process.env.ORDERING_ADMIN_PASSWORD))"
+pnpm --filter @ordering/server exec node --input-type=module -e "import { hash } from '@node-rs/argon2'; console.log((await hash(process.env.ORDERING_ADMIN_PASSWORD)).replaceAll('$', '\\$'))"
 Remove-Item Env:ORDERING_ADMIN_PASSWORD
 ```
 
-把输出的完整 `$argon2id$...` 字符串写入 `.env` 的 `ADMIN_PASSWORD_HASH`。执行结束后关闭该终端可进一步清除进程环境。
+把输出的完整 `\$argon2id\$...` 字符串写入 `.env` 的 `ADMIN_PASSWORD_HASH`，并保留反斜杠。Next.js 会展开 `.env` 中未转义的 `$NAME` 引用；执行结束后关闭该终端可进一步清除进程环境。
 
 ## 4. 迁移、种子和开发服务器
 

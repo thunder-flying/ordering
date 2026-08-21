@@ -37,5 +37,10 @@ describe("POST /api/v1/admin/dishes", () => {
 
     expect(createDish).toHaveBeenCalledWith(input);
     expect(response.status).toBe(201);
+    expect(await response.json()).toEqual({
+      code: 201,
+      message: "success",
+      data: { id: "dish-1" },
+    });
   });
 });

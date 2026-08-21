@@ -1,12 +1,11 @@
 import {
   SavedListSearch,
   SaveListInput,
-  apiSuccess,
 } from "@ordering/contracts";
-import { NextResponse } from "next/server";
 
 import { route } from "../../../../lib/http/handler";
 import { parseJson, parseSearchParams } from "../../../../lib/http/json";
+import { jsonSuccess } from "../../../../lib/http/response";
 import { checkRateLimit } from "../../../../lib/security/rate-limit";
 import { requireUser } from "../../../../modules/auth/require-user";
 import { createList, listLists } from "../../../../modules/lists/list-service";
@@ -23,7 +22,7 @@ export const POST = route(async (request) => {
   const { userId } = await requireUser(request);
   checkRateLimit(`create-list:${userId}`, CREATE_LIST_RATE_RULE);
   const input = await parseJson(request, SaveListInput);
-  return NextResponse.json(apiSuccess(await createList(userId, input)), {
+  return jsonSuccess(await createList(userId, input), {
     status: 201,
   });
 });

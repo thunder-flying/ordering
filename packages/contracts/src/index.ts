@@ -57,4 +57,4 @@ export type {
 } from "./menu";
 export type { ApiErrorCode } from "./errors";
 export { apiFailure, apiSuccess } from "./result";
-export type { ApiResult } from "./result";
+export type { ApiResponse } from "./result";

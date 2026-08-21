@@ -1,8 +1,6 @@
-import { apiSuccess } from "@ordering/contracts";
-import { NextResponse } from "next/server";
-
 import { ApiError } from "../../../../../../lib/http/api-error";
 import { route } from "../../../../../../lib/http/handler";
+import { jsonSuccess } from "../../../../../../lib/http/response";
 import { checkRateLimit } from "../../../../../../lib/security/rate-limit";
 import { requireAdmin } from "../../../../../../modules/admin/require-admin";
 import { storeDishImage } from "../../../../../../modules/uploads/upload-service";
@@ -27,7 +25,7 @@ export const POST = route(async (request) => {
     throw new ApiError("VALIDATION_ERROR", "必须且只能上传一个图片文件", 400);
   }
 
-  return NextResponse.json(apiSuccess(await storeDishImage(files[0])), {
+  return jsonSuccess(await storeDishImage(files[0]), {
     status: 201,
   });
 });

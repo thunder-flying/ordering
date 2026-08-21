@@ -1,8 +1,8 @@
-import { AdminLoginRequest, apiSuccess } from "@ordering/contracts";
-import { NextResponse } from "next/server";
+import { AdminLoginRequest } from "@ordering/contracts";
 
 import { route } from "../../../../../lib/http/handler";
 import { parseJson } from "../../../../../lib/http/json";
+import { jsonSuccess } from "../../../../../lib/http/response";
 import {
   checkAdminLoginRateLimit,
   clearAdminCookie,
@@ -25,12 +25,10 @@ export const POST = route(async (request) => {
     `${sourceAddress(request)}:${input.username.toLocaleLowerCase("en-US")}`,
   );
   const session = await createAdminSession(input.username, input.password);
-  const response = NextResponse.json(
-    apiSuccess({
-      csrfToken: session.csrf,
-      expiresAt: session.expiresAt,
-    }),
-  );
+  const response = jsonSuccess({
+    csrfToken: session.csrf,
+    expiresAt: session.expiresAt,
+  });
   response.headers.append("set-cookie", session.cookie);
   return response;
 });
@@ -45,7 +43,7 @@ export const GET = route(async (request) => {
 
 export const DELETE = route(async (request) => {
   await requireAdmin(request);
-  const response = NextResponse.json(apiSuccess({ success: true as const }));
+  const response = jsonSuccess({ success: true as const });
   response.headers.append("set-cookie", clearAdminCookie());
   return response;
 });

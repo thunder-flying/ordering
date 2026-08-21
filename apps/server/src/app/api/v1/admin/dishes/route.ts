@@ -1,15 +1,14 @@
 import {
   AdminDishSearch,
   DishInput,
-  apiSuccess,
 } from "@ordering/contracts";
-import { NextResponse } from "next/server";
 
 import { route } from "../../../../../lib/http/handler";
 import {
   parseJson,
   parseSearchParams,
 } from "../../../../../lib/http/json";
+import { jsonSuccess } from "../../../../../lib/http/response";
 import { requireAdmin } from "../../../../../modules/admin/require-admin";
 import {
   createDish,
@@ -28,5 +27,5 @@ export const GET = route(async (request) => {
 export const POST = route(async (request) => {
   await requireAdmin(request);
   const input = await parseJson(request, DishInput);
-  return NextResponse.json(apiSuccess(await createDish(input)), { status: 201 });
+  return jsonSuccess(await createDish(input), { status: 201 });
 });

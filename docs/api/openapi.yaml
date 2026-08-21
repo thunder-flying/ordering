@@ -45,14 +45,18 @@ paths:
       responses:
         '200':
           description: 服务和数据库可用
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema: { $ref: '#/components/schemas/HealthResponse' }
         '503':
           description: 数据库暂时不可用
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/HealthResponse' }
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
         '429': { $ref: '#/components/responses/RateLimited' }
 
   /api/v1/auth/wechat:
@@ -70,6 +74,8 @@ paths:
       responses:
         '200':
           description: 登录成功
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -89,6 +95,8 @@ paths:
       responses:
         '200':
           description: 当前会话已删除
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -106,6 +114,8 @@ paths:
       responses:
         '200':
           description: 当前用户资料
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -127,6 +137,8 @@ paths:
       responses:
         '200':
           description: 更新后的资料
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -158,6 +170,8 @@ paths:
       responses:
         '200':
           description: 更新后的资料，avatarUrl 为 10 分钟签名 URL
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -177,6 +191,8 @@ paths:
       responses:
         '200':
           description: 标记后的资料
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -200,6 +216,8 @@ paths:
       responses:
         '200':
           description: 私有数据已清空
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -224,6 +242,8 @@ paths:
       responses:
         '200':
           description: 账号已注销，当前令牌立即失效
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -241,6 +261,8 @@ paths:
       responses:
         '200':
           description: 按 sortOrder、id 排序的分类
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -262,6 +284,8 @@ paths:
       responses:
         '200':
           description: 可用菜品分页结果
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -284,6 +308,8 @@ paths:
       responses:
         '200':
           description: 输入顺序对应的菜品状态
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -305,6 +331,8 @@ paths:
       responses:
         '200':
           description: 收藏菜品分页结果
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -325,6 +353,8 @@ paths:
       responses:
         '200':
           description: 已收藏
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -341,6 +371,8 @@ paths:
       responses:
         '200':
           description: 已取消收藏
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -361,6 +393,8 @@ paths:
       responses:
         '200':
           description: 按更新时间倒序的清单分页
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -383,6 +417,8 @@ paths:
       responses:
         '201':
           description: 已创建；相同 idempotencyKey 重试返回同一清单
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -405,6 +441,8 @@ paths:
       responses:
         '200':
           description: 清单详情
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -427,6 +465,8 @@ paths:
       responses:
         '200':
           description: 更新后的清单；相同幂等键重试返回该结果
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -445,6 +485,8 @@ paths:
       responses:
         '200':
           description: 清单已删除
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -471,6 +513,8 @@ paths:
       responses:
         '201':
           description: 已复制，并返回因下架而跳过的菜品名称
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -497,6 +541,7 @@ paths:
         '200':
           description: 登录成功并设置 HttpOnly Cookie
           headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
             Set-Cookie:
               schema: { type: string }
               description: ordering_admin_session，Secure、HttpOnly、SameSite=Strict
@@ -517,6 +562,8 @@ paths:
       responses:
         '200':
           description: 当前管理员会话
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -534,6 +581,7 @@ paths:
         '200':
           description: Cookie 已失效
           headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
             Set-Cookie:
               schema: { type: string }
           content:
@@ -554,6 +602,8 @@ paths:
       responses:
         '200':
           description: 不包含用户身份和个人清单内容的聚合数据
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -575,6 +625,8 @@ paths:
       responses:
         '200':
           description: 管理分类分页
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -598,6 +650,8 @@ paths:
       responses:
         '201':
           description: 已创建分类
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -627,6 +681,8 @@ paths:
       responses:
         '200':
           description: 已更新分类
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -653,6 +709,8 @@ paths:
       responses:
         '200':
           description: 分类已软删除
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -681,6 +739,8 @@ paths:
       responses:
         '200':
           description: 管理菜品分页
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -704,6 +764,8 @@ paths:
       responses:
         '201':
           description: 已创建菜品
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -733,6 +795,8 @@ paths:
       responses:
         '200':
           description: 已更新菜品
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -759,6 +823,8 @@ paths:
       responses:
         '200':
           description: 菜品已软删除
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -794,6 +860,8 @@ paths:
       responses:
         '201':
           description: 图片已安全保存，返回关联 ID
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
           content:
             application/json:
               schema:
@@ -816,6 +884,7 @@ paths:
         '200':
           description: 图片二进制
           headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
             Cache-Control:
               schema: { type: string }
               description: 内容哈希 URL 使用 public immutable
@@ -846,6 +915,7 @@ paths:
         '200':
           description: 头像二进制，不允许共享缓存
           headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
             Cache-Control:
               schema: { const: private, type: string }
           content:
@@ -925,35 +995,51 @@ components:
         type: string
         pattern: '^[A-Za-z0-9_-]{32,128}\.(jpg|png|webp)$'
 
+  headers:
+    RequestId:
+      description: 本次请求的安全追踪 ID；客户端可传入，服务端校验后决定沿用或重新生成
+      schema: { type: string, minLength: 1, maxLength: 64 }
+
   responses:
     ValidationError:
       description: 请求字段不符合契约
+      headers:
+        X-Request-ID: { $ref: '#/components/headers/RequestId' }
       content:
         application/json:
           schema: { $ref: '#/components/schemas/ErrorResponse' }
     Unauthenticated:
       description: 会话缺失、无效或过期
+      headers:
+        X-Request-ID: { $ref: '#/components/headers/RequestId' }
       content:
         application/json:
           schema: { $ref: '#/components/schemas/ErrorResponse' }
     Forbidden:
       description: 已认证但禁止执行
+      headers:
+        X-Request-ID: { $ref: '#/components/headers/RequestId' }
       content:
         application/json:
           schema: { $ref: '#/components/schemas/ErrorResponse' }
     NotFound:
       description: 资源不存在或当前用户无权感知
+      headers:
+        X-Request-ID: { $ref: '#/components/headers/RequestId' }
       content:
         application/json:
           schema: { $ref: '#/components/schemas/ErrorResponse' }
     Conflict:
       description: 并发版本或业务状态冲突
+      headers:
+        X-Request-ID: { $ref: '#/components/headers/RequestId' }
       content:
         application/json:
           schema: { $ref: '#/components/schemas/ErrorResponse' }
     RateLimited:
       description: 请求频率超过限制
       headers:
+        X-Request-ID: { $ref: '#/components/headers/RequestId' }
         Retry-After:
           schema: { type: integer, minimum: 1 }
       content:
@@ -961,11 +1047,15 @@ components:
           schema: { $ref: '#/components/schemas/ErrorResponse' }
     WechatUnavailable:
       description: 微信登录服务暂时不可用
+      headers:
+        X-Request-ID: { $ref: '#/components/headers/RequestId' }
       content:
         application/json:
           schema: { $ref: '#/components/schemas/ErrorResponse' }
     InternalError:
       description: 未预期服务端错误
+      headers:
+        X-Request-ID: { $ref: '#/components/headers/RequestId' }
       content:
         application/json:
           schema: { $ref: '#/components/schemas/ErrorResponse' }
@@ -974,15 +1064,16 @@ components:
     HealthResponse:
       type: object
       additionalProperties: false
-      required: [ok, data]
+      required: [code, message, data]
       properties:
-        ok: { const: true, type: boolean }
+        code: { const: 200, type: integer }
+        message: { const: success, type: string }
         data:
           type: object
           additionalProperties: false
           required: [status]
           properties:
-            status: { type: string, enum: [ok, unavailable] }
+            status: { const: ok, type: string }
 
     ResourceId:
       type: string
@@ -999,37 +1090,21 @@ components:
       format: int32
       minimum: 0
       maximum: 9999999
-    ApiErrorCode:
-      type: string
-      enum:
-        - VALIDATION_ERROR
-        - UNAUTHENTICATED
-        - FORBIDDEN
-        - NOT_FOUND
-        - CONFLICT
-        - RATE_LIMITED
-        - WECHAT_UNAVAILABLE
-        - INTERNAL_ERROR
     ErrorResponse:
       type: object
       additionalProperties: false
-      required: [ok, error]
+      required: [code, message, data]
       properties:
-        ok: { const: false, type: boolean }
-        error:
-          type: object
-          additionalProperties: false
-          required: [code, message, requestId]
-          properties:
-            code: { $ref: '#/components/schemas/ApiErrorCode' }
-            message: { type: string, minLength: 1, maxLength: 200 }
-            requestId: { type: string, minLength: 1, maxLength: 64 }
+        code: { type: integer, minimum: 400, maximum: 599 }
+        message: { type: string, minLength: 1, maxLength: 200 }
+        data: { type: 'null' }
     ActionResponse:
       type: object
       additionalProperties: false
-      required: [ok, data]
+      required: [code, message, data]
       properties:
-        ok: { const: true, type: boolean }
+        code: { const: 200, type: integer }
+        message: { const: success, type: string }
         data:
           type: object
           additionalProperties: false
@@ -1055,9 +1130,10 @@ components:
     WechatLoginResponse:
       type: object
       additionalProperties: false
-      required: [ok, data]
+      required: [code, message, data]
       properties:
-        ok: { const: true, type: boolean }
+        code: { const: 200, type: integer }
+        message: { const: success, type: string }
         data: { $ref: '#/components/schemas/AuthSession' }
 
     Profile:
@@ -1076,9 +1152,10 @@ components:
     ProfileResponse:
       type: object
       additionalProperties: false
-      required: [ok, data]
+      required: [code, message, data]
       properties:
-        ok: { const: true, type: boolean }
+        code: { const: 200, type: integer }
+        message: { const: success, type: string }
         data: { $ref: '#/components/schemas/Profile' }
     UpdateNicknameRequest:
       type: object
@@ -1110,9 +1187,10 @@ components:
     PublicCategoryListResponse:
       type: object
       additionalProperties: false
-      required: [ok, data]
+      required: [code, message, data]
       properties:
-        ok: { const: true, type: boolean }
+        code: { const: 200, type: integer }
+        message: { const: success, type: string }
         data:
           type: object
           additionalProperties: false
@@ -1137,9 +1215,10 @@ components:
     PublicDishPageResponse:
       type: object
       additionalProperties: false
-      required: [ok, data]
+      required: [code, message, data]
       properties:
-        ok: { const: true, type: boolean }
+        code: { const: 200, type: integer }
+        message: { const: success, type: string }
         data:
           type: object
           additionalProperties: false
@@ -1181,9 +1260,10 @@ components:
     DishAvailabilityResponse:
       type: object
       additionalProperties: false
-      required: [ok, data]
+      required: [code, message, data]
       properties:
-        ok: { const: true, type: boolean }
+        code: { const: 200, type: integer }
+        message: { const: success, type: string }
         data:
           type: object
           additionalProperties: false
@@ -1196,9 +1276,10 @@ components:
     FavoritePageResponse:
       type: object
       additionalProperties: false
-      required: [ok, data]
+      required: [code, message, data]
       properties:
-        ok: { const: true, type: boolean }
+        code: { const: 200, type: integer }
+        message: { const: success, type: string }
         data:
           type: object
           additionalProperties: false
@@ -1214,9 +1295,10 @@ components:
     FavoriteMutationResponse:
       type: object
       additionalProperties: false
-      required: [ok, data]
+      required: [code, message, data]
       properties:
-        ok: { const: true, type: boolean }
+        code: { const: 200, type: integer }
+        message: { const: success, type: string }
         data:
           type: object
           additionalProperties: false
@@ -1310,9 +1392,10 @@ components:
     SavedListPageResponse:
       type: object
       additionalProperties: false
-      required: [ok, data]
+      required: [code, message, data]
       properties:
-        ok: { const: true, type: boolean }
+        code: { const: 200, type: integer }
+        message: { const: success, type: string }
         data:
           type: object
           additionalProperties: false
@@ -1328,16 +1411,18 @@ components:
     SavedListDetailResponse:
       type: object
       additionalProperties: false
-      required: [ok, data]
+      required: [code, message, data]
       properties:
-        ok: { const: true, type: boolean }
+        code: { type: integer, enum: [200, 201] }
+        message: { const: success, type: string }
         data: { $ref: '#/components/schemas/SavedListDetail' }
     CopyListResponse:
       type: object
       additionalProperties: false
-      required: [ok, data]
+      required: [code, message, data]
       properties:
-        ok: { const: true, type: boolean }
+        code: { const: 201, type: integer }
+        message: { const: success, type: string }
         data:
           type: object
           additionalProperties: false
@@ -1366,9 +1451,10 @@ components:
     AdminSessionResponse:
       type: object
       additionalProperties: false
-      required: [ok, data]
+      required: [code, message, data]
       properties:
-        ok: { const: true, type: boolean }
+        code: { const: 200, type: integer }
+        message: { const: success, type: string }
         data: { $ref: '#/components/schemas/AdminSession' }
 
     TopDishStat:
@@ -1395,9 +1481,10 @@ components:
     AdminStatsResponse:
       type: object
       additionalProperties: false
-      required: [ok, data]
+      required: [code, message, data]
       properties:
-        ok: { const: true, type: boolean }
+        code: { const: 200, type: integer }
+        message: { const: success, type: string }
         data: { $ref: '#/components/schemas/AdminStats' }
 
     CategoryCreateRequest:
@@ -1442,16 +1529,18 @@ components:
     AdminCategoryResponse:
       type: object
       additionalProperties: false
-      required: [ok, data]
+      required: [code, message, data]
       properties:
-        ok: { const: true, type: boolean }
+        code: { type: integer, enum: [200, 201] }
+        message: { const: success, type: string }
         data: { $ref: '#/components/schemas/AdminCategory' }
     AdminCategoryPageResponse:
       type: object
       additionalProperties: false
-      required: [ok, data]
+      required: [code, message, data]
       properties:
-        ok: { const: true, type: boolean }
+        code: { const: 200, type: integer }
+        message: { const: success, type: string }
         data:
           type: object
           additionalProperties: false
@@ -1514,16 +1603,18 @@ components:
     AdminDishResponse:
       type: object
       additionalProperties: false
-      required: [ok, data]
+      required: [code, message, data]
       properties:
-        ok: { const: true, type: boolean }
+        code: { type: integer, enum: [200, 201] }
+        message: { const: success, type: string }
         data: { $ref: '#/components/schemas/AdminDish' }
     AdminDishPageResponse:
       type: object
       additionalProperties: false
-      required: [ok, data]
+      required: [code, message, data]
       properties:
-        ok: { const: true, type: boolean }
+        code: { const: 200, type: integer }
+        message: { const: success, type: string }
         data:
           type: object
           additionalProperties: false
@@ -1549,7 +1640,8 @@ components:
     UploadResponse:
       type: object
       additionalProperties: false
-      required: [ok, data]
+      required: [code, message, data]
       properties:
-        ok: { const: true, type: boolean }
+        code: { const: 201, type: integer }
+        message: { const: success, type: string }
         data: { $ref: '#/components/schemas/Upload' }

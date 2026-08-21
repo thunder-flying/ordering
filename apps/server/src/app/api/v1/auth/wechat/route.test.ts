@@ -37,7 +37,8 @@ describe("POST /api/v1/auth/wechat", () => {
     expect(response.status).toBe(200);
     expect(createUserSession).toHaveBeenCalledWith("wx-code");
     expect(await response.json()).toMatchObject({
-      ok: true,
+      code: 200,
+      message: "success",
       data: { token: "a".repeat(43) },
     });
   });
@@ -52,5 +53,9 @@ describe("POST /api/v1/auth/wechat", () => {
 
     expect(response.status).toBe(400);
     expect(createUserSession).not.toHaveBeenCalled();
+    expect(await response.json()).toMatchObject({
+      code: 400,
+      data: null,
+    });
   });
 });

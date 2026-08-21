@@ -39,7 +39,8 @@ export function route<TContext extends object = Record<string, never>>(
       const response =
         data instanceof Response
           ? data
-          : NextResponse.json(apiSuccess(data), {
+          : NextResponse.json(apiSuccess(data, 200), {
+              status: 200,
               headers: { "x-request-id": requestId },
             });
 
@@ -70,7 +71,7 @@ export function route<TContext extends object = Record<string, never>>(
         "request failed",
       );
       return NextResponse.json(
-        apiFailure(safe.code, safe.message, requestId),
+        apiFailure(safe.status, safe.message),
         {
           headers: { "x-request-id": requestId },
           status: safe.status,

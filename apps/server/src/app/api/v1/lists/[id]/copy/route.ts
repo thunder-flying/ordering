@@ -1,9 +1,9 @@
-import { CopyListInput, ResourceId, apiSuccess } from "@ordering/contracts";
-import { NextResponse } from "next/server";
+import { CopyListInput, ResourceId } from "@ordering/contracts";
 
 import { ApiError } from "../../../../../../lib/http/api-error";
 import { route } from "../../../../../../lib/http/handler";
 import { parseJson } from "../../../../../../lib/http/json";
+import { jsonSuccess } from "../../../../../../lib/http/response";
 import { requireUser } from "../../../../../../modules/auth/require-user";
 import { copyList } from "../../../../../../modules/lists/list-service";
 
@@ -23,7 +23,7 @@ export const POST = route<CopyListRouteContext>(async (request, context) => {
   const { userId } = await requireUser(request);
   const listId = await listIdFrom(context);
   const input = await parseJson(request, CopyListInput);
-  return NextResponse.json(apiSuccess(await copyList(userId, listId, input)), {
+  return jsonSuccess(await copyList(userId, listId, input), {
     status: 201,
   });
 });

@@ -1,7 +1,5 @@
-import { apiSuccess } from "@ordering/contracts";
-import { NextResponse } from "next/server";
-
 import { route } from "../../../../lib/http/handler";
+import { jsonFailure } from "../../../../lib/http/response";
 import { prisma } from "../../../../lib/prisma";
 
 export const GET = route(async () => {
@@ -9,8 +7,6 @@ export const GET = route(async () => {
     await prisma.$queryRaw`SELECT 1`;
     return { status: "ok" as const };
   } catch {
-    return NextResponse.json(apiSuccess({ status: "unavailable" as const }), {
-      status: 503,
-    });
+    return jsonFailure(503, "服务暂时不可用");
   }
 });

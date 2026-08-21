@@ -23,7 +23,8 @@ describe("GET /api/v1/health", () => {
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
-      ok: true,
+      code: 200,
+      message: "success",
       data: { status: "ok" },
     });
   });
@@ -37,7 +38,11 @@ describe("GET /api/v1/health", () => {
     const body = await response.text();
 
     expect(response.status).toBe(503);
-    expect(body).toContain("unavailable");
+    expect(JSON.parse(body)).toEqual({
+      code: 503,
+      message: "服务暂时不可用",
+      data: null,
+    });
     expect(body).not.toContain("mysql://secret");
   });
 });

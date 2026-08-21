@@ -24,12 +24,10 @@ describe("route", () => {
     })(request());
 
     expect(response.status).toBe(400);
-    expect(await response.json()).toMatchObject({
-      ok: false,
-      error: {
-        code: "VALIDATION_ERROR",
-        message: "名称不能为空",
-      },
+    expect(await response.json()).toEqual({
+      code: 400,
+      message: "名称不能为空",
+      data: null,
     });
   });
 
@@ -43,7 +41,8 @@ describe("route", () => {
     const body = await response.text();
 
     expect(response.status).toBe(500);
-    expect(body).toContain("INTERNAL_ERROR");
+    expect(body).toContain('"code":500');
+    expect(body).not.toContain("INTERNAL_ERROR");
     expect(body).not.toContain("DATABASE_URL");
     expect(body).not.toContain("mysql://secret");
     expect(JSON.stringify(errorLog.mock.calls)).not.toContain("mysql://secret");
@@ -57,9 +56,18 @@ describe("route", () => {
 
     expect(requestId).toMatch(/^[0-9a-f-]{36}$/);
     expect(await response.json()).toEqual({
-      ok: true,
+      code: 200,
+      message: "success",
       data: { requestId },
     });
+  });
+
+  it("echoes a safe incoming request ID", async () => {
+    const response = await route(async () => ({ success: true }))(
+      request({ "x-request-id": "client-request-123" }),
+    );
+
+    expect(response.headers.get("x-request-id")).toBe("client-request-123");
   });
 });
 

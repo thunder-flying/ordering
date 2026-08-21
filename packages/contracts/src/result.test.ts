@@ -2,22 +2,28 @@ import { describe, expect, it } from "vitest";
 
 import { apiFailure, apiSuccess } from "./result";
 
-describe("API result envelope", () => {
-  it("keeps success data separate from failure details", () => {
+describe("API response builders", () => {
+  it("wraps a default 200 success response", () => {
     expect(apiSuccess({ id: "dish-1" })).toEqual({
-      ok: true,
+      code: 200,
+      message: "success",
       data: { id: "dish-1" },
     });
+  });
 
-    expect(
-      apiFailure("VALIDATION_ERROR", "名称不能为空", "request-1"),
-    ).toEqual({
-      ok: false,
-      error: {
-        code: "VALIDATION_ERROR",
-        message: "名称不能为空",
-        requestId: "request-1",
-      },
+  it("uses an explicit successful HTTP status", () => {
+    expect(apiSuccess({ id: "dish-1" }, 201)).toEqual({
+      code: 201,
+      message: "success",
+      data: { id: "dish-1" },
+    });
+  });
+
+  it("uses the HTTP error status and null data", () => {
+    expect(apiFailure(400, "名称不能为空")).toEqual({
+      code: 400,
+      message: "名称不能为空",
+      data: null,
     });
   });
 });

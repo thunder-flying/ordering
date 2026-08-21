@@ -29,7 +29,8 @@ describe("PUT /api/v1/favorites/:dishId", () => {
 
     expect(addFavorite).toHaveBeenCalledWith("user-a", dishId);
     expect(await response.json()).toEqual({
-      ok: true,
+      code: 200,
+      message: "success",
       data: { dishId, favorited: true },
     });
   });

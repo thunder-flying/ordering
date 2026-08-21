@@ -121,7 +121,7 @@ export default function DishesPage() {
       await loadDishes();
       await loadCategories();
     } catch (caught) {
-      if (caught instanceof AdminApiError && caught.code === "CONFLICT") {
+      if (caught instanceof AdminApiError && caught.code === 409) {
         await loadDishes();
         throw new Error("这道菜刚刚被修改，列表已刷新，请重新打开后再保存。");
       }
