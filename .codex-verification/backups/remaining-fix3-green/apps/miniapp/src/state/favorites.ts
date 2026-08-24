@@ -1,0 +1,209 @@
+import { addFavorite, fetchFavorites, removeFavorite } from "../api/favorites";
+
+const FAVORITES_STORAGE_KEY = "ordering.favorites:v1";
+export type FavoriteState = { ids: Set<string>; loaded: boolean; pending: Set<string> };
+
+type BlockedWaiter = { resolve(): void; reject(error: unknown): void };
+type BlockedIntent = { value: boolean; waiters: BlockedWaiter[] };
+
+let state: FavoriteState | undefined;
+let loadGeneration = 0;
+let mutationGeneration = 0;
+let revision = 0;
+let nextBarrierToken = 0;
+const mutationRevision = new Map<string, number>();
+const desired = new Map<string, boolean>();
+const confirmed = new Set<string>();
+const work = new Map<string, { generation: number; promise: Promise<void> }>();
+const barrierTokens = new Set<number>();
+const blockedIntents = new Map<string, BlockedIntent>();
+
+function cloneState(): FavoriteState {
+  const current = loadCached();
+  return { ids: new Set(current.ids), pending: new Set(current.pending), loaded: current.loaded };
+}
+
+function cache(): void {
+  wx.setStorageSync(FAVORITES_STORAGE_KEY, JSON.stringify([...loadCached().ids]));
+}
+
+function loadCached(): FavoriteState {
+  if (state) return state;
+  const raw = wx.getStorageSync(FAVORITES_STORAGE_KEY);
+  let ids: string[] = [];
+  if (typeof raw === "string") {
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.every((id) => typeof id === "string")) ids = parsed;
+      else wx.removeStorageSync(FAVORITES_STORAGE_KEY);
+    } catch {
+      wx.removeStorageSync(FAVORITES_STORAGE_KEY);
+    }
+  }
+  state = { ids: new Set(ids), loaded: false, pending: new Set() };
+  ids.forEach((id) => confirmed.add(id));
+  return state;
+}
+
+function markMutation(dishId: string): void {
+  revision += 1;
+  mutationRevision.set(dishId, revision);
+}
+
+function apply(dishId: string, value: boolean): void {
+  const current = loadCached();
+  if (value) current.ids.add(dishId);
+  else current.ids.delete(dishId);
+}
+
+async function process(dishId: string, generation: number): Promise<void> {
+  const current = loadCached();
+  current.pending.add(dishId);
+  try {
+    while (generation === mutationGeneration && desired.has(dishId)) {
+      const target = desired.get(dishId)!;
+      if (confirmed.has(dishId) === target) {
+        desired.delete(dishId);
+        continue;
+      }
+      try {
+        if (target) await addFavorite(dishId);
+        else await removeFavorite(dishId);
+        if (generation !== mutationGeneration) return;
+        if (target) confirmed.add(dishId);
+        else confirmed.delete(dishId);
+        markMutation(dishId);
+      } catch (error) {
+        if (generation !== mutationGeneration) return;
+        markMutation(dishId);
+        if (desired.get(dishId) === target) {
+          desired.delete(dishId);
+          apply(dishId, confirmed.has(dishId));
+          cache();
+        }
+        throw error;
+      }
+      if (desired.get(dishId) === target) desired.delete(dishId);
+    }
+    if (generation !== mutationGeneration) return;
+    apply(dishId, confirmed.has(dishId));
+    cache();
+  } finally {
+    current.pending.delete(dishId);
+    if (generation === mutationGeneration) {
+      loadCached().pending.delete(dishId);
+      if (work.get(dishId)?.generation === generation) work.delete(dishId);
+    }
+  }
+}
+
+function runFavoriteIntent(dishId: string, value: boolean): Promise<void> {
+  loadCached();
+  markMutation(dishId);
+  desired.set(dishId, value);
+  apply(dishId, value);
+  const running = work.get(dishId);
+  if (running) return running.promise;
+  const generation = mutationGeneration;
+  const promise = process(dishId, generation);
+  work.set(dishId, { generation, promise });
+  return promise;
+}
+
+function queueBlockedIntent(dishId: string, value: boolean): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    const current = blockedIntents.get(dishId);
+    if (current) {
+      current.value = value;
+      current.waiters.push({ resolve, reject });
+    } else {
+      blockedIntents.set(dishId, { value, waiters: [{ resolve, reject }] });
+    }
+  });
+}
+
+function flushBlockedIntents(): void {
+  if (barrierTokens.size || !blockedIntents.size) return;
+  const intents = [...blockedIntents.entries()];
+  blockedIntents.clear();
+  intents.forEach(([dishId, intent]) => {
+    runFavoriteIntent(dishId, intent.value).then(
+      () => intent.waiters.forEach((waiter) => waiter.resolve()),
+      (error) => intent.waiters.forEach((waiter) => waiter.reject(error)),
+    );
+  });
+}
+
+export function getFavoriteState(): FavoriteState {
+  return cloneState();
+}
+
+export async function loadFavorites(): Promise<void> {
+  const current = loadCached();
+  const generation = ++loadGeneration;
+  const baselineRevision = revision;
+  const ids = new Set<string>();
+  const visitedCursors = new Set<string>();
+  let cursor: string | undefined;
+  while (true) {
+    if (cursor) visitedCursors.add(cursor);
+    const response = await fetchFavorites(cursor ? { cursor, limit: 50 } : { limit: 50 });
+    response.items.forEach((item) => ids.add(item.id));
+    const nextCursor = response.nextCursor;
+    if (!nextCursor || visitedCursors.has(nextCursor)) break;
+    cursor = nextCursor;
+  }
+  if (generation !== loadGeneration) return;
+
+  const nextIds = new Set(ids);
+  const nextConfirmed = new Set(ids);
+  mutationRevision.forEach((dishRevision, dishId) => {
+    if (dishRevision <= baselineRevision) return;
+    if (current.ids.has(dishId)) nextIds.add(dishId);
+    else nextIds.delete(dishId);
+    if (confirmed.has(dishId)) nextConfirmed.add(dishId);
+    else nextConfirmed.delete(dishId);
+  });
+  confirmed.clear();
+  nextConfirmed.forEach((id) => confirmed.add(id));
+  state = { ids: nextIds, loaded: true, pending: new Set(current.pending) };
+  cache();
+}
+
+export function isFavorite(dishId: string): boolean {
+  return loadCached().ids.has(dishId);
+}
+
+export function setFavorite(dishId: string, value: boolean): Promise<void> {
+  if (barrierTokens.size) return queueBlockedIntent(dishId, value);
+  return runFavoriteIntent(dishId, value);
+}
+
+export function blockFavoriteMutations(): () => void {
+  const token = ++nextBarrierToken;
+  let released = false;
+  barrierTokens.add(token);
+  return () => {
+    if (released) return;
+    released = true;
+    barrierTokens.delete(token);
+    flushBlockedIntents();
+  };
+}
+
+export async function settleFavoriteMutations(): Promise<void> {
+  const snapshot = [...work.values()].map((entry) => entry.promise);
+  await Promise.allSettled(snapshot);
+}
+
+export function clearFavorites(): void {
+  loadGeneration += 1;
+  mutationGeneration += 1;
+  revision = 0;
+  state = { ids: new Set(), loaded: false, pending: new Set() };
+  desired.clear();
+  confirmed.clear();
+  mutationRevision.clear();
+  work.clear();
+  wx.removeStorageSync(FAVORITES_STORAGE_KEY);
+}

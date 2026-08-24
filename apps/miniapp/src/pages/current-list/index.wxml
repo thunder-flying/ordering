@@ -1,0 +1,122 @@
+<view class="current-page">
+  <view class="ledger-heading page-enter">
+    <view>
+      <text class="eyebrow">当 前 清 单</text>
+      <text class="page-title">把喜欢的味道记下来</text>
+    </view>
+    <text class="folio" aria-hidden="true">{{items.length}}</text>
+  </view>
+
+  <status-view
+    wx:if="{{!items.length}}"
+    kind="empty"
+    title="这一页还是空白"
+    detail="回到选菜页，把想记下的菜加入当前清单。"
+    action-text="回选菜页"
+    bindaction="handleBackToSelect"
+  />
+
+  <view wx:else class="list-sheet page-enter">
+    <label class="name-field">
+      <text class="field-kicker">清单题签</text>
+      <input
+        class="name-input"
+        value="{{name}}"
+        maxlength="40"
+        disabled="{{saving}}"
+        placeholder="例如：周末家常菜"
+        aria-label="清单名称，最多四十个字"
+        bindinput="handleNameInput"
+      />
+      <text class="field-count">{{name.length}} / 40</text>
+    </label>
+
+    <view wx:if="{{availabilityLoading}}" class="notice is-neutral" aria-role="status">
+      正在确认菜品与参考价格…
+    </view>
+    <view wx:if="{{availabilityError}}" class="notice is-error" aria-role="alert">
+      <text>{{availabilityError}}</text>
+      <button class="notice-action" bindtap="refreshAvailability">重新检查</button>
+    </view>
+    <view wx:if="{{unavailableNames.length}}" class="notice is-error" aria-role="alert">
+      <view>
+        <text>以下菜品暂时不可选，请先移出再保存：</text>
+        <text wx:for="{{unavailableNames}}" wx:key="*this">{{index ? '、' : ''}}{{item}}</text>
+      </view>
+    </view>
+    <view wx:if="{{saveError}}" class="notice is-error" aria-role="alert">
+      <text>{{saveError}}</text>
+      <button wx:if="{{conflict}}" class="notice-action" bindtap="handleReloadConflict">重新载入</button>
+    </view>
+
+    <view class="draft-list">
+      <view
+        wx:for="{{items}}"
+        wx:key="dishId"
+        class="draft-card {{item.available ? '' : 'is-unavailable'}}"
+        aria-label="{{item.name}}{{item.available ? '' : '，暂时不可选'}}"
+      >
+        <view class="card-head">
+          <image wx:if="{{item.imageUrl}}" class="dish-image" src="{{item.imageUrl}}" mode="aspectFill" />
+          <view wx:else class="dish-fallback" aria-hidden="true">味</view>
+          <view class="dish-copy">
+            <view class="name-line">
+              <text class="dish-name">{{item.name}}</text>
+              <text wx:if="{{!item.available}}" class="unavailable-mark">暂不可选</text>
+            </view>
+            <text class="reference-price">{{item.priceText}} · 参考价格</text>
+            <text class="subtotal">小计 {{item.subtotalText}}</text>
+          </view>
+        </view>
+
+        <view class="quantity-row">
+          <text class="row-label">数量</text>
+          <quantity-stepper
+            quantity="{{item.quantity}}"
+            disabled="{{saving || !item.available}}"
+            data-id="{{item.dishId}}"
+            bindchange="handleQuantity"
+          />
+        </view>
+
+        <label class="note-field">
+          <text class="row-label">备注</text>
+          <textarea
+            class="note-input"
+            value="{{item.note}}"
+            maxlength="100"
+            disabled="{{saving}}"
+            auto-height
+            placeholder="可选，例如少盐"
+            aria-label="{{item.name}}的备注，最多一百个字"
+            data-id="{{item.dishId}}"
+            bindinput="handleNoteInput"
+          />
+          <text class="note-count">{{item.noteLength}} / 100</text>
+        </label>
+
+        <button
+          class="remove-button"
+          disabled="{{saving}}"
+          data-id="{{item.dishId}}"
+          aria-label="移出{{item.name}}"
+          bindtap="handleRemove"
+        >移出这道菜</button>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{items.length}}" class="save-dock">
+    <view class="total-block">
+      <text class="total-label">预估合计</text>
+      <text class="total-value">{{totalText}}</text>
+    </view>
+    <button
+      class="save-button"
+      disabled="{{!canSave || saving}}"
+      loading="{{saving}}"
+      aria-label="{{editMode ? '保存清单修改' : '保存当前清单'}}"
+      bindtap="handleSave"
+    >{{editMode ? '保存修改' : '保存清单'}}</button>
+  </view>
+</view>

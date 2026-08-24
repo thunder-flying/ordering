@@ -1,0 +1,79 @@
+:host {
+  display: block;
+}
+
+.profile-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 44rpx;
+}
+
+.field-label {
+  color: #486354;
+  font-size: 24rpx;
+  letter-spacing: 4rpx;
+}
+
+.avatar-field,
+.nickname-field {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.avatar-button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 136rpx;
+  margin: 0;
+  padding: 20rpx 24rpx;
+  border: 1rpx solid #ded3c0;
+  border-radius: 4rpx;
+  background: #fffaf0;
+  color: #1f4d3a;
+  text-align: left;
+}
+
+.avatar-button::after {
+  border: 0;
+}
+
+.avatar-image,
+.avatar-placeholder {
+  width: 92rpx;
+  height: 92rpx;
+  flex: 0 0 92rpx;
+  border-radius: 50%;
+}
+
+.avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border: 2rpx solid #1f4d3a;
+  background: #edf0e7;
+}
+
+.avatar-mark {
+  font-size: 38rpx;
+  font-weight: 700;
+}
+
+.avatar-action {
+  margin-left: 24rpx;
+  font-size: 28rpx;
+}
+
+.nickname-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 96rpx;
+  padding: 0 24rpx;
+  border: 1rpx solid #ded3c0;
+  border-radius: 4rpx;
+  background: #fffaf0;
+  color: #263b31;
+  font-family: "Noto Serif SC", "Songti SC", serif;
+}

@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "选菜",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark",
+  "usingComponents": {
+    "dish-card": "/components/dish-card/index",
+    "status-view": "/components/status-view/index"
+  }
+}

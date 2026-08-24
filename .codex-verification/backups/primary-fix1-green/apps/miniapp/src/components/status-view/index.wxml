@@ -1,0 +1,6 @@
+<view class="status status-{{kind}}" role="status">
+  <view class="status-seal" aria-hidden="true">{{kind === 'error' ? '候' : kind === 'loading' ? '待' : '空'}}</view>
+  <text class="status-title">{{title}}</text>
+  <text wx:if="{{detail}}" class="status-detail">{{detail}}</text>
+  <button wx:if="{{actionText}}" class="status-action" bindtap="handleAction">{{actionText}}</button>
+</view>

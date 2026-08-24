@@ -1,0 +1,132 @@
+<view class="saved-page">
+  <view wx:if="{{viewMode === 'list'}}">
+    <view class="archive-heading page-enter">
+      <view>
+        <text class="eyebrow">我 的 清 单</text>
+        <text class="page-title">翻一翻从前的选择</text>
+      </view>
+      <text class="archive-mark" aria-hidden="true">册</text>
+    </view>
+
+    <status-view
+      wx:if="{{loading}}"
+      kind="loading"
+      title="正在翻阅清单簿"
+      detail="稍候片刻，已保存的清单正在整理。"
+    />
+    <status-view
+      wx:elif="{{listError && !cards.length}}"
+      kind="error"
+      title="清单簿没有打开"
+      detail="{{listError}}"
+      action-text="重新加载"
+      bindaction="handleRetry"
+    />
+    <status-view
+      wx:elif="{{!cards.length}}"
+      kind="empty"
+      title="还没有保存清单"
+      detail="在当前清单写好题签并保存后，会收进这里。"
+    />
+
+    <view wx:else class="archive-list page-enter">
+      <view wx:if="{{listError}}" class="inline-error" aria-role="alert">
+        <text>{{listError}}</text>
+        <button class="inline-action" bindtap="handleRetry">重新加载</button>
+      </view>
+      <button
+        wx:for="{{cards}}"
+        wx:key="id"
+        class="archive-card"
+        data-id="{{item.id}}"
+        aria-label="打开清单{{item.name}}"
+        bindtap="handleOpenDetail"
+      >
+        <view class="card-index" aria-hidden="true">{{index + 1}}</view>
+        <view class="card-copy">
+          <text class="card-name">{{item.name}}</text>
+          <text class="card-meta">{{item.itemCount}} 道菜 · 更新于 {{item.updatedText}}</text>
+        </view>
+        <view class="card-total">
+          <text class="total-number">{{item.totalText}}</text>
+          <text class="total-label">预估合计</text>
+        </view>
+      </button>
+      <view wx:if="{{loadingMore}}" class="list-footer">正在续写清单簿…</view>
+    </view>
+  </view>
+
+  <view wx:else class="detail-page">
+    <button class="back-button" bindtap="handleBackToList" aria-label="返回我的清单">← 返回清单簿</button>
+
+    <status-view
+      wx:if="{{detailLoading}}"
+      kind="loading"
+      title="正在翻到这一页"
+      detail="正在读取当时保存的名称和参考价格。"
+    />
+    <status-view
+      wx:elif="{{detailError && !detail}}"
+      kind="error"
+      title="这一页没有打开"
+      detail="{{detailError}}"
+      action-text="重新加载"
+      bindaction="handleRetry"
+    />
+
+    <view wx:elif="{{detail}}" class="detail-sheet page-enter">
+      <view class="detail-heading">
+        <text class="eyebrow">清 单 存 页</text>
+        <text class="detail-title">{{detail.name}}</text>
+        <text class="detail-date">保存参考 · {{detail.updatedText}}</text>
+      </view>
+
+      <view wx:if="{{detailError}}" class="inline-error" aria-role="alert">{{detailError}}</view>
+
+      <view class="snapshot-list">
+        <view
+          wx:for="{{detail.items}}"
+          wx:key="position"
+          class="snapshot-item {{item.currentlyAvailable ? '' : 'is-unavailable'}}"
+        >
+          <view class="snapshot-number" aria-hidden="true">{{index + 1}}</view>
+          <view class="snapshot-copy">
+            <view class="snapshot-name-row">
+              <text class="snapshot-name">{{item.name}}</text>
+              <text wx:if="{{!item.currentlyAvailable}}" class="availability-mark">暂不可选</text>
+            </view>
+            <text class="snapshot-meta">{{item.referencePriceText}} 参考价格 × {{item.quantity}}</text>
+            <text wx:if="{{item.note}}" class="snapshot-note">备注：{{item.note}}</text>
+          </view>
+          <text class="snapshot-subtotal">{{item.subtotalText}}</text>
+        </view>
+      </view>
+
+      <view class="detail-total">
+        <text>预估合计</text>
+        <text class="detail-total-value">{{detail.totalText}}</text>
+      </view>
+
+      <view class="detail-actions">
+        <button
+          class="primary-action"
+          disabled="{{actionPending}}"
+          loading="{{actionPending === 'edit'}}"
+          bindtap="handleContinueEditing"
+        >继续编辑</button>
+        <button
+          class="secondary-action"
+          disabled="{{actionPending}}"
+          loading="{{actionPending === 'copy'}}"
+          bindtap="handleCopy"
+        >复制清单</button>
+        <button
+          class="danger-action"
+          disabled="{{actionPending}}"
+          loading="{{actionPending === 'delete'}}"
+          bindtap="handleDelete"
+        >删除清单</button>
+      </view>
+    </view>
+  </view>
+</view>

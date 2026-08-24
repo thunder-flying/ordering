@@ -1,0 +1,45 @@
+.stepper {
+  display: inline-flex;
+  min-height: 88rpx;
+  align-items: center;
+  overflow: hidden;
+  border: 1rpx solid #cfc4b3;
+  border-radius: 4rpx;
+  background: #fffcf5;
+}
+
+.step-button {
+  width: 88rpx;
+  min-width: 88rpx;
+  min-height: 88rpx;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #1f4d3a;
+  font-size: 34rpx;
+  font-weight: 700;
+  line-height: 88rpx;
+}
+
+.step-button::after {
+  border: 0;
+}
+
+.step-button[disabled] {
+  color: #9a988f;
+}
+
+.quantity {
+  display: flex;
+  width: 76rpx;
+  min-height: 88rpx;
+  align-items: center;
+  justify-content: center;
+  border-right: 1rpx solid #ddd2bf;
+  border-left: 1rpx solid #ddd2bf;
+  color: #263b31;
+  font-size: 28rpx;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}

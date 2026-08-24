@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "写下你的称呼",
+  "usingComponents": {
+    "avatar-picker": "/components/avatar-picker/index",
+    "status-view": "/components/status-view/index"
+  }
+}

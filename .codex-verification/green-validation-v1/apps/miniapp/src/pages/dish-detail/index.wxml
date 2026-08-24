@@ -1,0 +1,67 @@
+<view class="detail-page">
+  <status-view
+    wx:if="{{status === 'loading'}}"
+    kind="loading"
+    title="正在翻到这一页"
+    detail="正在确认这道菜今天是否仍可选择。"
+  />
+
+  <status-view
+    wx:elif="{{status === 'unavailable'}}"
+    kind="empty"
+    title="这道菜暂时不可选"
+    detail="菜单会不时调整，可以返回选菜页看看别的味道。"
+  />
+
+  <status-view
+    wx:elif="{{status === 'error'}}"
+    kind="error"
+    title="这一页没有打开"
+    detail="{{errorMessage}}"
+    action-text="重新加载"
+    bindaction="loadDetail"
+  />
+
+  <view wx:else class="detail-sheet page-enter">
+    <view class="hero-frame">
+      <image
+        wx:if="{{dish.imageUrl && !imageFailed}}"
+        class="hero-image"
+        src="{{dish.imageUrl}}"
+        mode="aspectFill"
+        binderror="handleImageError"
+      />
+      <view wx:else class="hero-fallback" aria-hidden="true">
+        <text class="fallback-small">今日菜单</text>
+        <text class="fallback-large">一味</text>
+      </view>
+      <view class="number-seal" aria-hidden="true">荐</view>
+    </view>
+
+    <view class="detail-copy">
+      <view class="detail-heading">
+        <view class="name-stack">
+          <text class="eyebrow">菜 品 小 记</text>
+          <text class="dish-name">{{dish.name}}</text>
+        </view>
+        <view class="price-block">
+          <text class="price">{{dish.priceText}}</text>
+          <text class="price-label">参考价格</text>
+        </view>
+      </view>
+
+      <view class="rule"></view>
+      <text class="description">{{dish.description || '这道菜还没有写下详细介绍，留待入口时慢慢体会。'}}</text>
+
+      <view class="detail-actions">
+        <button
+          class="favorite-button {{dish.favorited ? 'is-favorite' : ''}}"
+          disabled="{{favoritePending}}"
+          loading="{{favoritePending}}"
+          bindtap="handleFavorite"
+        >{{dish.favorited ? '取消收藏' : '收藏这道菜'}}</button>
+        <button class="add-button" bindtap="handleAddDish">加入当前清单</button>
+      </view>
+    </view>
+  </view>
+</view>

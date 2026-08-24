@@ -1,0 +1,19 @@
+{
+  "name": "@ordering/miniapp",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ordering/contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "miniprogram-api-typings": "^4.0.0",
+    "miniprogram-simulate": "^1.6.1",
+    "typescript": "^5.0.0",
+    "vitest": "^4.0.0"
+  }
+}

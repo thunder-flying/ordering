@@ -1,0 +1,108 @@
+<view class="select-page">
+  <view class="menu-heading page-enter">
+    <view>
+      <text class="eyebrow">今 日 菜 单</text>
+      <text class="heading-title">慢慢挑，正合心意</text>
+    </view>
+    <view class="folio" aria-hidden="true">MENU</view>
+  </view>
+
+  <view class="search-row">
+    <view class="search-box">
+      <text class="search-mark" aria-hidden="true">寻</text>
+      <input
+        class="search-input"
+        value="{{queryInput}}"
+        maxlength="40"
+        confirm-type="search"
+        placeholder="搜菜名或简介"
+        bindinput="handleSearchInput"
+      />
+      <button wx:if="{{queryInput}}" class="clear-search" bindtap="handleClearSearch" aria-label="清空搜索">清</button>
+    </view>
+  </view>
+
+  <view class="filter-switch" aria-role="radiogroup" aria-label="菜品范围">
+    <button
+      class="filter-option {{filter === 'all' ? 'is-active' : ''}}"
+      data-filter="all"
+      aria-role="radio"
+      aria-checked="{{filter === 'all'}}"
+      aria-label="{{filter === 'all' ? '全部菜品，已选中' : '全部菜品，未选中'}}"
+      bindtap="handleFilter"
+    >全部</button>
+    <button
+      class="filter-option {{filter === 'favorites' ? 'is-active' : ''}}"
+      data-filter="favorites"
+      aria-role="radio"
+      aria-checked="{{filter === 'favorites'}}"
+      aria-label="{{filter === 'favorites' ? '收藏菜品，已选中' : '收藏菜品，未选中'}}"
+      bindtap="handleFilter"
+    >收藏</button>
+  </view>
+
+  <scroll-view class="category-strip" scroll-x enhanced show-scrollbar="{{false}}">
+    <view class="category-list">
+      <button
+        class="category-chip {{!categoryId ? 'is-active' : ''}}"
+        data-id=""
+        bindtap="handleCategory"
+      >全部分类</button>
+      <button
+        wx:for="{{categories}}"
+        wx:key="id"
+        class="category-chip {{categoryId === item.id ? 'is-active' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="handleCategory"
+      >{{item.name}}</button>
+    </view>
+  </scroll-view>
+
+  <view wx:if="{{refreshNotice}}" class="refresh-notice" aria-role="alert">
+    <text class="refresh-notice-text">{{refreshNotice}}</text>
+    <button class="refresh-retry" bindtap="handleRefreshRetry">重新刷新</button>
+  </view>
+
+  <view wx:if="{{loading}}" class="dish-list skeleton-list" aria-label="菜品加载中">
+    <view wx:for="{{skeletons}}" wx:key="*this" class="skeleton-card">
+      <view class="skeleton-image shimmer"></view>
+      <view class="skeleton-copy">
+        <view class="skeleton-line skeleton-title shimmer"></view>
+        <view class="skeleton-line shimmer"></view>
+        <view class="skeleton-line skeleton-short shimmer"></view>
+      </view>
+    </view>
+  </view>
+
+  <status-view
+    wx:elif="{{errorMessage}}"
+    kind="error"
+    title="菜单页折了一角"
+    detail="{{errorMessage}}"
+    action-text="重新加载"
+    bindaction="handleRetry"
+  />
+
+  <status-view
+    wx:elif="{{!dishes.length}}"
+    kind="empty"
+    title="{{emptyTitle}}"
+    detail="{{emptyDetail}}"
+    action-text="{{query ? '清空搜索' : ''}}"
+    bindaction="handleClearSearch"
+  />
+
+  <view wx:else class="dish-list">
+    <dish-card
+      wx:for="{{dishes}}"
+      wx:key="id"
+      dish="{{item}}"
+      favorite-pending="{{item.favoritePending}}"
+      bindfavoritechange="handleFavorite"
+      bindadddish="handleAddDish"
+      bindopendetail="handleOpenDetail"
+    />
+    <view wx:if="{{loadingMore}}" class="list-footer">正在续写菜单…</view>
+    <view wx:elif="{{filter === 'all' && !nextCursor}}" class="list-footer">— 已经翻到最后一页 —</view>
+  </view>
+</view>

@@ -1,0 +1,84 @@
+<view class="profile-page">
+  <status-view
+    wx:if="{{phase === 'loading'}}"
+    kind="loading"
+    title="正在打开个人页"
+    detail="稍候片刻，正在读取你保存的资料。"
+  />
+  <status-view
+    wx:elif="{{phase === 'failed'}}"
+    kind="error"
+    title="个人页没有打开"
+    detail="{{errorMessage}}"
+    action-text="重新加载"
+    bindaction="loadInitialProfile"
+  />
+
+  <view wx:else class="profile-content page-enter">
+    <view class="profile-heading">
+      <view>
+        <text class="eyebrow">我 的 菜 单 簿</text>
+        <text class="page-title">只属于你的这一页</text>
+      </view>
+      <text class="seal" aria-hidden="true">私</text>
+    </view>
+
+    <view class="profile-paper">
+      <avatar-picker
+        avatar-url="{{avatarUrl}}"
+        nickname="{{nickname}}"
+        disabled="{{phase === 'saving' || workingAction}}"
+        bindavatarchange="handleAvatarChange"
+        bindnicknamechange="handleNicknameChange"
+      />
+      <view wx:if="{{errorMessage}}" class="inline-error" aria-role="alert">{{errorMessage}}</view>
+      <button
+        class="save-profile"
+        disabled="{{!canSave || phase === 'saving' || workingAction}}"
+        loading="{{phase === 'saving'}}"
+        bindtap="handleSaveProfile"
+      >保存个人资料</button>
+    </view>
+
+    <button class="favorites-entry" bindtap="handleOpenFavorites" aria-label="打开我的收藏">
+      <view>
+        <text class="entry-kicker">收藏夹</text>
+        <text class="entry-title">看看留过心的菜</text>
+      </view>
+      <text class="entry-arrow" aria-hidden="true">→</text>
+    </button>
+
+    <view class="privacy-paper">
+      <view class="section-heading">
+        <text class="section-kicker">隐 私 说 明</text>
+        <text class="section-title">你的选择，留在你的菜单簿</text>
+      </view>
+      <view class="privacy-lines">
+        <view class="privacy-line"><text class="line-mark">一</text><text>身份匹配通过微信登录完成，用于区分各自的个人内容。</text></view>
+        <view class="privacy-line"><text class="line-mark">二</text><text>头像和昵称为可选资料，可以随时修改，也可以保持默认。</text></view>
+        <view class="privacy-line"><text class="line-mark">三</text><text>当前选择、收藏和已保存清单均为个人内容，不对其他用户公开。</text></view>
+        <view class="privacy-line"><text class="line-mark">四</text><text>管理端只查看无法关联个人身份的聚合统计。</text></view>
+        <view class="privacy-line"><text class="line-mark">五</text><text>清空会删除收藏与清单但保留资料；注销会删除账号和全部个人内容。</text></view>
+      </view>
+      <button class="privacy-contract" bindtap="handleOpenPrivacyContract">打开微信隐私保护指引</button>
+    </view>
+
+    <view class="data-actions">
+      <text class="section-kicker">数 据 管 理</text>
+      <button
+        class="clear-action"
+        disabled="{{workingAction || phase === 'saving'}}"
+        loading="{{workingAction === 'clear'}}"
+        bindtap="handleClearData"
+      >清空个人数据</button>
+      <text class="action-note">删除收藏、当前清单和已保存清单，保留头像、昵称与登录身份。</text>
+      <button
+        class="delete-action"
+        disabled="{{workingAction || phase === 'saving'}}"
+        loading="{{workingAction === 'delete'}}"
+        bindtap="handleDeleteAccount"
+      >注销账号</button>
+      <text class="action-note is-danger">注销不可恢复，将删除资料、收藏、清单与当前登录身份。</text>
+    </view>
+  </view>
+</view>

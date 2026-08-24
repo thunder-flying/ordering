@@ -1,0 +1,69 @@
+:host {
+  display: block;
+}
+
+.status {
+  display: flex;
+  min-height: 480rpx;
+  padding: 72rpx 54rpx;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.status-seal {
+  display: flex;
+  width: 92rpx;
+  height: 92rpx;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 30rpx;
+  border: 3rpx double #b94b3e;
+  color: #b94b3e;
+  font-size: 34rpx;
+  font-weight: 700;
+  transform: rotate(-4deg);
+}
+
+.status-loading .status-seal {
+  border-color: #85947e;
+  color: #61725f;
+  animation: breathe 1.6s ease-in-out infinite;
+}
+
+.status-title {
+  color: #263f33;
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.status-detail {
+  max-width: 540rpx;
+  margin-top: 14rpx;
+  color: #76786f;
+  font-size: 26rpx;
+  line-height: 1.7;
+}
+
+.status-action {
+  min-width: 220rpx;
+  min-height: 88rpx;
+  margin-top: 34rpx;
+  border: 1rpx solid #1f4d3a;
+  border-radius: 4rpx;
+  background: transparent;
+  color: #1f4d3a;
+  font-size: 28rpx;
+  line-height: 88rpx;
+}
+
+.status-action::after {
+  border: 0;
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}

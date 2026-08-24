@@ -1,0 +1,37 @@
+<view class="profile-fields">
+  <view class="avatar-field">
+    <text class="field-label">头像</text>
+    <button
+      class="avatar-button"
+      open-type="chooseAvatar"
+      disabled="{{disabled}}"
+      bindchooseavatar="handleChooseAvatar"
+      aria-label="选择头像"
+    >
+      <image
+        wx:if="{{avatarUrl && !imageFailed}}"
+        class="avatar-image"
+        src="{{avatarUrl}}"
+        mode="aspectFill"
+        binderror="handleImageError"
+      />
+      <view wx:else class="avatar-placeholder" aria-hidden="true">
+        <text class="avatar-mark">食</text>
+      </view>
+      <text class="avatar-action">轻触选择</text>
+    </button>
+  </view>
+
+  <label class="nickname-field">
+    <text class="field-label">昵称</text>
+    <input
+      class="nickname-input"
+      type="nickname"
+      maxlength="40"
+      value="{{nickname}}"
+      disabled="{{disabled}}"
+      placeholder="写下一个称呼"
+      bindinput="handleNicknameInput"
+    />
+  </label>
+</view>

@@ -1,0 +1,18 @@
+page {
+  --paper: #f7f3ea;
+  --paper-bright: #fffcf5;
+  --ink: #1f4d3a;
+  --ink-muted: #6f756b;
+  --cinnabar: #b94b3e;
+  --line: #e7dfd1;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Noto Serif SC", "Songti SC", serif;
+  font-size: 30rpx;
+  line-height: 1.6;
+}
+
+button,
+.tap-target {
+  min-height: 88rpx;
+}

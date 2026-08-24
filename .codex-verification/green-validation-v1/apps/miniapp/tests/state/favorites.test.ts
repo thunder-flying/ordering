@@ -1,0 +1,74 @@
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+const { fetchFavorites, addFavorite, removeFavorite } = vi.hoisted(() => ({ fetchFavorites: vi.fn(), addFavorite: vi.fn(), removeFavorite: vi.fn() }));
+vi.mock("../../src/api/favorites", () => ({ fetchFavorites, addFavorite, removeFavorite }));
+
+import { clearFavorites, getFavoriteState, isFavorite, loadFavorites, setFavorite } from "../../src/state/favorites";
+
+const wxBoundary = { getStorageSync: vi.fn(), setStorageSync: vi.fn(), removeStorageSync: vi.fn() };
+
+afterEach(() => { clearFavorites(); vi.restoreAllMocks(); });
+
+describe("favorites state", () => {
+  it("loads cached ids and refreshes from the server", async () => {
+    Object.assign(globalThis, { wx: wxBoundary });
+    wxBoundary.getStorageSync.mockReturnValue(JSON.stringify(["cached"]));
+    fetchFavorites.mockResolvedValue({ items: [{ id: "fresh" }], nextCursor: null });
+    await loadFavorites();
+    expect(getFavoriteState().ids).toEqual(new Set(["fresh"]));
+    expect(wxBoundary.setStorageSync).toHaveBeenCalled();
+  });
+
+  it("loads every cursor page into the real favorite state", async () => {
+    Object.assign(globalThis, { wx: wxBoundary });
+    wxBoundary.getStorageSync.mockReturnValue(undefined);
+    fetchFavorites.mockResolvedValueOnce({ items: [{ id: "first" }], nextCursor: "page-2" }).mockResolvedValueOnce({ items: [{ id: "second" }], nextCursor: null });
+    await loadFavorites();
+    expect(getFavoriteState().ids).toEqual(new Set(["first", "second"]));
+    expect(getFavoriteState().loaded).toBe(true);
+    expect(fetchFavorites).toHaveBeenNthCalledWith(1, { limit: 50 });
+    expect(fetchFavorites).toHaveBeenNthCalledWith(2, { cursor: "page-2", limit: 50 });
+  });
+
+  it("rolls an optimistic change back on failure", async () => {
+    Object.assign(globalThis, { wx: wxBoundary });
+    wxBoundary.getStorageSync.mockReturnValue(undefined);
+    addFavorite.mockRejectedValueOnce(new Error("offline"));
+    const pending = setFavorite("dish-1", true);
+    expect(getFavoriteState().ids.has("dish-1")).toBe(true);
+    await expect(pending).rejects.toThrow("offline");
+    expect(getFavoriteState().ids.has("dish-1")).toBe(false);
+  });
+
+  it("serializes rapid choices so the final intent wins", async () => {
+    Object.assign(globalThis, { wx: wxBoundary });
+    wxBoundary.getStorageSync.mockReturnValue(undefined);
+    let resolveFirst!: () => void;
+    addFavorite.mockImplementationOnce(() => new Promise<void>((resolve) => { resolveFirst = resolve; }));
+    removeFavorite.mockResolvedValueOnce(undefined);
+    const first = setFavorite("dish-1", true);
+    const second = setFavorite("dish-1", false);
+    expect(getFavoriteState().ids.has("dish-1")).toBe(false);
+    resolveFirst();
+    await Promise.all([first, second]);
+    expect(removeFavorite).toHaveBeenCalledWith("dish-1");
+    expect(getFavoriteState().ids.has("dish-1")).toBe(false);
+  });
+
+  it("does not let an older full load overwrite a successful mutation", async () => {
+    Object.assign(globalThis, { wx: wxBoundary });
+    wxBoundary.getStorageSync.mockReturnValue(undefined);
+    let resolveLoad!: (value: { items: Array<{ id: string }>; nextCursor: null }) => void;
+    fetchFavorites.mockImplementationOnce(() => new Promise((resolve) => { resolveLoad = resolve; }));
+    addFavorite.mockResolvedValueOnce(undefined);
+
+    const loading = loadFavorites();
+    await Promise.resolve();
+    await setFavorite("dish-1", true);
+    resolveLoad({ items: [], nextCursor: null });
+    await loading;
+
+    expect(isFavorite("dish-1")).toBe(true);
+    expect(getFavoriteState().ids).toEqual(new Set(["dish-1"]));
+  });
+});

@@ -1,0 +1,41 @@
+<article class="dish-card">
+  <view class="dish-main tap-target" bindtap="handleOpen" aria-label="查看{{dish.name}}详情">
+    <view class="dish-image-wrap">
+      <image
+        wx:if="{{dish.imageUrl && !imageFailed}}"
+        class="dish-image"
+        src="{{dish.imageUrl}}"
+        mode="aspectFill"
+        lazy-load="true"
+        binderror="handleImageError"
+      />
+      <view wx:else class="dish-image-fallback" aria-hidden="true">
+        <text>今日</text>
+        <text>一味</text>
+      </view>
+    </view>
+
+    <view class="dish-copy">
+      <view class="dish-heading">
+        <text class="dish-name">{{dish.name}}</text>
+        <text class="dish-price">{{dish.priceText}}</text>
+      </view>
+      <text class="price-caption">参考价格</text>
+      <text class="dish-description">{{dish.description || '留一点想象，等入口再慢慢说。'}}</text>
+    </view>
+  </view>
+
+  <view class="dish-actions">
+    <button
+      class="favorite-button {{dish.favorited ? 'is-favorite' : ''}}"
+      disabled="{{favoritePending}}"
+      bindtap="handleFavorite"
+      aria-label="{{dish.favorited ? '取消收藏' : '收藏'}}{{dish.name}}"
+    >
+      {{dish.favorited ? '已收藏' : '收藏'}}
+    </button>
+    <button class="add-button" bindtap="handleAdd" aria-label="将{{dish.name}}加入当前清单">
+      加入选择
+    </button>
+  </view>
+</article>

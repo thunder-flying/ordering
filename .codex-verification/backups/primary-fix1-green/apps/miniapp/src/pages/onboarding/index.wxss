@@ -1,0 +1,107 @@
+.onboarding-page {
+  min-height: 100vh;
+}
+
+.onboarding-sheet {
+  padding: 76rpx 44rpx 48rpx;
+}
+
+.title-block {
+  margin-bottom: 52rpx;
+}
+
+.eyebrow {
+  display: block;
+  color: #b94b3e;
+  font-size: 22rpx;
+  font-weight: 700;
+  letter-spacing: 9rpx;
+}
+
+.page-title {
+  display: block;
+  margin-top: 20rpx;
+  color: #1f4d3a;
+  font-size: 60rpx;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.intro {
+  display: block;
+  max-width: 590rpx;
+  margin-top: 20rpx;
+  color: #6d746b;
+  font-size: 27rpx;
+  line-height: 1.75;
+}
+
+.form-paper {
+  position: relative;
+  padding: 42rpx 34rpx 32rpx;
+  border: 1rpx solid #dfd3bf;
+  border-radius: 6rpx;
+  background: #fffcf5;
+  box-shadow: 0 20rpx 48rpx rgba(51, 60, 49, 0.08);
+}
+
+.form-paper::after {
+  position: absolute;
+  right: 28rpx;
+  bottom: 28rpx;
+  width: 54rpx;
+  height: 54rpx;
+  border: 2rpx solid rgba(185, 75, 62, 0.25);
+  content: "";
+  transform: rotate(7deg);
+}
+
+.inline-error {
+  display: block;
+  margin-top: 28rpx;
+  padding: 18rpx 20rpx;
+  border-left: 5rpx solid #b94b3e;
+  background: #f9ece6;
+  color: #8e3c32;
+  font-size: 25rpx;
+  line-height: 1.55;
+}
+
+.primary-button,
+.quiet-button {
+  min-height: 96rpx;
+  margin: 34rpx 0 0;
+  border-radius: 4rpx;
+  font-size: 29rpx;
+  line-height: 96rpx;
+}
+
+.primary-button {
+  background: #1f4d3a;
+  color: #fffaf0;
+  letter-spacing: 4rpx;
+}
+
+.primary-button[disabled] {
+  background: #aab1a8;
+  color: #f7f3ea;
+}
+
+.quiet-button {
+  margin-top: 12rpx;
+  background: transparent;
+  color: #617067;
+}
+
+.primary-button::after,
+.quiet-button::after {
+  border: 0;
+}
+
+.footnote {
+  display: block;
+  margin-top: 28rpx;
+  color: #898a81;
+  font-size: 23rpx;
+  text-align: center;
+}

@@ -1,0 +1,15 @@
+<view class="stepper" aria-role="group" aria-label="数量调整">
+  <button
+    class="step-button"
+    disabled="{{disabled || quantity <= 1}}"
+    aria-label="减少数量，当前 {{quantity}}"
+    bindtap="handleDecrement"
+  >−</button>
+  <text class="quantity" aria-live="polite">{{quantity}}</text>
+  <button
+    class="step-button"
+    disabled="{{disabled || quantity >= 99}}"
+    aria-label="增加数量，当前 {{quantity}}"
+    bindtap="handleIncrement"
+  >＋</button>
+</view>

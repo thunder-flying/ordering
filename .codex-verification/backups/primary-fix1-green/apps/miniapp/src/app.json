@@ -1,0 +1,29 @@
+{
+  "pages": [
+    "pages/onboarding/index",
+    "pages/dish-detail/index",
+    "pages/select/index",
+    "pages/current-list/index",
+    "pages/my-lists/index",
+    "pages/profile/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "我的选菜清单",
+    "navigationBarBackgroundColor": "#F7F3EA",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#F7F3EA",
+    "backgroundTextStyle": "light"
+  },
+  "tabBar": {
+    "color": "#6F756B",
+    "selectedColor": "#1F4D3A",
+    "backgroundColor": "#FFFCF5",
+    "list": [
+      { "pagePath": "pages/select/index", "text": "选菜" },
+      { "pagePath": "pages/current-list/index", "text": "当前清单" },
+      { "pagePath": "pages/my-lists/index", "text": "我的清单" },
+      { "pagePath": "pages/profile/index", "text": "我的" }
+    ]
+  },
+  "lazyCodeLoading": "requiredComponents"
+}

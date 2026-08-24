@@ -1,0 +1,51 @@
+<view class="onboarding-page">
+  <status-view
+    wx:if="{{phase === 'loading'}}"
+    kind="loading"
+    title="正在铺开菜单簿"
+    detail="稍候片刻，我们正在准备你的个人资料。"
+  />
+
+  <status-view
+    wx:elif="{{phase === 'failed'}}"
+    kind="error"
+    title="资料没有加载好"
+    detail="{{errorMessage}}"
+    action-text="重新加载"
+    bindaction="loadInitialProfile"
+  />
+
+  <view wx:else class="onboarding-sheet page-enter">
+    <view class="title-block">
+      <text class="eyebrow">私 人 菜 单 簿</text>
+      <text class="page-title">怎么称呼你？</text>
+      <text class="intro">头像和昵称都是可选资料，只会用于展示你自己的个人资料。</text>
+    </view>
+
+    <view class="form-paper">
+      <avatar-picker
+        avatar-url="{{avatarUrl}}"
+        nickname="{{nickname}}"
+        disabled="{{phase === 'saving'}}"
+        bindavatarchange="handleAvatarChange"
+        bindnicknamechange="handleNicknameChange"
+      />
+
+      <text wx:if="{{errorMessage}}" class="inline-error" role="alert">{{errorMessage}}</text>
+
+      <button
+        class="primary-button"
+        disabled="{{!canSave || phase === 'saving'}}"
+        loading="{{phase === 'saving'}}"
+        bindtap="handleSave"
+      >
+        保存并进入
+      </button>
+      <button class="quiet-button" disabled="{{phase === 'saving'}}" bindtap="handleSkip">
+        暂时跳过
+      </button>
+    </view>
+
+    <text class="footnote">以后也可以在“我的”里重新填写。</text>
+  </view>
+</view>
