@@ -11,11 +11,11 @@ const EnvSchema = z.object({
   DATABASE_URL: z.url(),
   OPENID_HMAC_SECRET: z.string().min(32),
   WECHAT_APP_ID: configuredCredential(
-    "wx0006792d6129b164",
+    "replace-with-your-wechat-app-id",
     "WECHAT_APP_ID",
   ),
   WECHAT_APP_SECRET: configuredCredential(
-    "5c2f90f61e99b009b7f7299f5ca7f3b2",
+    "replace-with-your-wechat-app-secret",
     "WECHAT_APP_SECRET",
   ),
   USER_SESSION_PEPPER: z.string().min(32),

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { request, upload } = vi.hoisted(() => ({ request: vi.fn(), upload: vi.fn() }));
 vi.mock("../../src/api/request", () => ({ request, upload }));
@@ -7,6 +7,24 @@ import { completeOnboarding, saveAvatar, updateNickname } from "../../src/api/pr
 import { addFavorite, fetchFavorites, removeFavorite } from "../../src/api/favorites";
 import { copyList, createList, fetchLists, updateList } from "../../src/api/lists";
 import { fetchDishAvailability, fetchDishes } from "../../src/api/menu";
+
+const relativeImageDish = {
+  id: "dish-1",
+  categoryId: "cat-hot",
+  name: "番茄牛腩",
+  description: "慢炖至软嫩",
+  imageUrl: "/media/dishes/beef.jpg",
+  referencePriceCents: 2_680,
+  sortOrder: 1,
+};
+
+beforeEach(() => {
+  Object.assign(globalThis, {
+    wx: {
+      getAccountInfoSync: () => ({ miniProgram: { envVersion: "develop" } }),
+    },
+  });
+});
 
 describe("typed miniapp API clients", () => {
   it("encodes menu queries", async () => {
@@ -24,6 +42,29 @@ describe("typed miniapp API clients", () => {
       data: { dishIds: ["dish-1"] },
       replaySafe: true,
     });
+  });
+
+  it("returns an absolute image URL for dishes from the menu endpoint", async () => {
+    request.mockResolvedValueOnce({ items: [relativeImageDish], nextCursor: null });
+
+    const response = await fetchDishes();
+
+    expect(response.items[0]?.imageUrl).toBe("http://127.0.0.1:3000/media/dishes/beef.jpg");
+  });
+
+  it("returns an absolute image URL for available favorite dishes", async () => {
+    request.mockResolvedValueOnce({
+      items: [{ dishId: "dish-1", available: true, dish: relativeImageDish }],
+    });
+
+    const response = await fetchDishAvailability(["dish-1"]);
+
+    expect(response.items[0]).toEqual(expect.objectContaining({
+      available: true,
+      dish: expect.objectContaining({
+        imageUrl: "http://127.0.0.1:3000/media/dishes/beef.jpg",
+      }),
+    }));
   });
 
   it("uses only server-owned profile routes", async () => {
