@@ -19,10 +19,30 @@
     "selectedColor": "#1F4D3A",
     "backgroundColor": "#FFFCF5",
     "list": [
-      { "pagePath": "pages/select/index", "text": "选菜" },
-      { "pagePath": "pages/current-list/index", "text": "当前清单" },
-      { "pagePath": "pages/my-lists/index", "text": "我的清单" },
-      { "pagePath": "pages/profile/index", "text": "我的" }
+      {
+        "pagePath": "pages/select/index",
+        "text": "选菜",
+        "iconPath": "assets/tab-bar/select.png",
+        "selectedIconPath": "assets/tab-bar/select-selected.png"
+      },
+      {
+        "pagePath": "pages/current-list/index",
+        "text": "当前清单",
+        "iconPath": "assets/tab-bar/current-list.png",
+        "selectedIconPath": "assets/tab-bar/current-list-selected.png"
+      },
+      {
+        "pagePath": "pages/my-lists/index",
+        "text": "我的清单",
+        "iconPath": "assets/tab-bar/my-lists.png",
+        "selectedIconPath": "assets/tab-bar/my-lists-selected.png"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "我的",
+        "iconPath": "assets/tab-bar/profile.png",
+        "selectedIconPath": "assets/tab-bar/profile-selected.png"
+      }
     ]
   },
   "lazyCodeLoading": "requiredComponents"
