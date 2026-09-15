@@ -55,6 +55,8 @@ export const PUBLIC_MENU_SEED: SeedCategory[] = [
       { name: "鱼香肉丝", description: "肉丝配木耳和笋丝快炒，咸甜微辣，鱼香味浓郁。", priceCents: 2_280, assetFileName: "yu-shiang-pork.webp" },
       { name: "宫保鸡丁", description: "嫩鸡丁搭配花生与干辣椒，酸甜微辣、口感丰富。", priceCents: 2_380, assetFileName: "kung-pao-chicken.webp" },
       { name: "麻婆豆腐", description: "嫩豆腐配牛肉末和花椒，麻辣鲜香，汤汁浓郁。", priceCents: 1_380, assetFileName: "mapo-tofu.webp" },
+      { name: "猪肉炖粉条", description: "五花肉与粉条一锅慢炖，汤汁浓郁，粉条吸满肉香。", priceCents: 2_680, assetFileName: "pork-vermicelli-stew.webp" },
+      { name: "东北大乱炖", description: "土豆、茄子、豆角和五花肉一锅炖煮，家常浓郁，热乎下饭。", priceCents: 3_280, assetFileName: "northeast-stew.webp" },
     ],
   },
   {
