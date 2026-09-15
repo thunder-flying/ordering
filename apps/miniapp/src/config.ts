@@ -1,7 +1,7 @@
 export const API_ORIGINS = {
   develop: "http://127.0.0.1:3000",
-  trial: "https://menu.example.com",
-  release: "https://menu.example.com",
+  trial: "https://api.guziyi.cn",
+  release: "https://api.guziyi.cn",
 } as const;
 
 type Environment = keyof typeof API_ORIGINS;

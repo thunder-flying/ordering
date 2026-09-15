@@ -1,0 +1,12 @@
+services:
+  mysql:
+    image: kaifanla-mysql:8.4-b3b90af2
+
+  nginx:
+    image: kaifanla-nginx:stable-1e0bd91d
+
+  nginx-bootstrap:
+    image: kaifanla-nginx:stable-1e0bd91d
+
+  certbot:
+    image: kaifanla-certbot:latest-34ee91d2

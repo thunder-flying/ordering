@@ -1,0 +1,16 @@
+.git
+.gitignore
+.codex-verification
+.pnpm-store
+node_modules
+**/node_modules
+**/.next
+**/.env
+**/.env.*
+**/coverage
+**/test-results
+**/playwright-report
+**/test-e2e-uploads
+**/*.log
+**/*.tsbuildinfo
+var

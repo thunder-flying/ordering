@@ -7,6 +7,7 @@
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
+    "verify:miniapp": "pnpm --filter @ordering/contracts test && pnpm --filter @ordering/miniapp typecheck && pnpm --filter @ordering/miniapp test",
     "verify:server": "pnpm --filter @ordering/contracts test && pnpm --filter @ordering/server lint && pnpm --filter @ordering/server typecheck && pnpm --filter @ordering/server test && pnpm --filter @ordering/server test:integration && pnpm --filter @ordering/server build"
   }
 }
