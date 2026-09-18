@@ -22,9 +22,7 @@ function getPrisma(): PrismaClient {
     adapter: new PrismaMariaDb(databaseUrl),
   });
 
-  if (process.env.NODE_ENV !== "production") {
-    globalForPrisma.prisma = client;
-  }
+  globalForPrisma.prisma = client;
 
   return client;
 }

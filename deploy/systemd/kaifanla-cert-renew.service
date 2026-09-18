@@ -1,0 +1,14 @@
+[Unit]
+Description=Renew kaifanla HTTPS certificate and reload Nginx
+Wants=network-online.target
+After=network-online.target docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/kaifanla/deploy
+ExecStart=/usr/bin/docker compose --env-file /etc/kaifanla/production.env -f docker-compose.prod.yml -f docker-compose.offline.yml --profile tls run --rm --no-deps certbot renew --cert-name api.guziyi.cn-auto --non-interactive
+ExecStartPost=/usr/bin/docker exec kaifanla-nginx-1 nginx -t
+ExecStartPost=/usr/bin/docker exec kaifanla-nginx-1 nginx -s reload
+TimeoutStartSec=15min
+
