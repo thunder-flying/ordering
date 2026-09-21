@@ -1,7 +1,0 @@
-{
-  "navigationBarTitleText": "我的清单",
-  "enablePullDownRefresh": true,
-  "usingComponents": {
-    "status-view": "/components/status-view/index"
-  }
-}

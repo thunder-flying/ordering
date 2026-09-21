@@ -1,7 +1,0 @@
-{
-  "navigationBarTitleText": "当前清单",
-  "usingComponents": {
-    "quantity-stepper": "/components/quantity-stepper/index",
-    "status-view": "/components/status-view/index"
-  }
-}

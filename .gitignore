@@ -6,6 +6,7 @@ test-results/
 playwright-report/
 var/uploads/
 .worktrees/
+/.codex-verification/
 
 .env*
 !.env.example

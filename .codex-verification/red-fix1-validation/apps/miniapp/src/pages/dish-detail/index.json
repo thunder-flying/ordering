@@ -1,8 +1,0 @@
-{
-  "navigationBarTitleText": "菜品详情",
-  "enablePullDownRefresh": true,
-  "backgroundTextStyle": "dark",
-  "usingComponents": {
-    "status-view": "/components/status-view/index"
-  }
-}
