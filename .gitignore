@@ -18,3 +18,6 @@ project.private.config.json
 apps/server/src/generated/prisma/
 apps/server/dist-cli/
 apps/server/test-e2e-uploads/
+
+# Large deployment image archives belong in an artifact registry, not Git.
+deploy/release/*.tar.gz
