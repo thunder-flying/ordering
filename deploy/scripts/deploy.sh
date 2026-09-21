@@ -75,28 +75,26 @@ done
 [ -f "$RELEASE_DIR/deploy.sh" ] || fail "release deploy script is missing"
 [ -f "$RELEASE_DIR/health-check.sh" ] || fail "release health check is missing"
 
-case "$APP_ROOT" in
-  /[A-Za-z0-9._-]*|/[A-Za-z0-9._-]*/[A-Za-z0-9._/-]*) ;;
-  *) fail "application root must be a simple absolute path" ;;
-esac
+[[ "$APP_ROOT" =~ ^/[A-Za-z0-9._/-]+$ ]] || fail "application root must be a simple absolute path"
+[[ "$APP_ROOT" != *..* ]] || fail "application root contains a parent traversal"
 case "$RELEASE_DIR" in
   "$APP_ROOT"/incoming/*) ;;
   *) fail "release directory must be inside the application incoming directory" ;;
 esac
-case "$APP_IMAGE" in
-  *[!a-zA-Z0-9._/-:]*|*:*:*) fail "application image contains unsupported characters" ;;
+case "$RELEASE_DIR" in
+  *..*) fail "release directory contains a parent traversal" ;;
 esac
-case "$TOOLING_IMAGE" in
-  *[!a-zA-Z0-9._/-:]*|*:*:*) fail "tooling image contains unsupported characters" ;;
-esac
+[[ "$APP_IMAGE" =~ ^[a-zA-Z0-9._/-]+:[a-zA-Z0-9._-]+$ ]] || fail "application image contains unsupported characters"
+[[ "$TOOLING_IMAGE" =~ ^[a-zA-Z0-9._/-]+:[a-zA-Z0-9._-]+$ ]] || fail "tooling image contains unsupported characters"
 
 command -v docker >/dev/null 2>&1 || fail "docker is missing"
 docker compose version >/dev/null 2>&1 || fail "docker compose is missing"
+command -v gzip >/dev/null 2>&1 || fail "gzip is missing"
 
 COMPOSE_FILE="$APP_ROOT/deploy/docker-compose.prod.yml"
 RECORD_DIR=/var/lib/kaifanla/deployments
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
-RECORD_FILE="$RECORD_DIR/${STAMP}-${APP_IMAGE##*:}.record"
+RECORD_FILE="$RECORD_DIR/${STAMP}-${RELEASE_DIR##*/}.record"
 COMPOSE_ENV="$(mktemp /run/kaifanla-compose.env.XXXXXX)"
 PREVIOUS_APP_IMAGE=
 
@@ -133,6 +131,17 @@ make_compose_env() {
   sed -E '/^(APP_IMAGE|TOOLING_IMAGE)=/d' "$ENV_FILE" > "$output_file"
   printf 'APP_IMAGE=%s\nTOOLING_IMAGE=%s\n' "$app_image" "$tooling_image" >> "$output_file"
   chmod 0600 "$output_file"
+}
+
+rollback_application() {
+  if [ -n "$PREVIOUS_APP_IMAGE" ] && docker image inspect "$PREVIOUS_APP_IMAGE" >/dev/null 2>&1; then
+    local rollback_env
+    rollback_env="$(mktemp /run/kaifanla-rollback.env.XXXXXX)"
+    make_compose_env "$PREVIOUS_APP_IMAGE" "$TOOLING_IMAGE" "$rollback_env"
+    local rollback_compose=(docker compose --profile tls --env-file "$rollback_env" -f "$COMPOSE_FILE")
+    "${rollback_compose[@]}" up -d --no-build server nginx >/dev/null 2>&1 || true
+    rm -f -- "$rollback_env"
+  fi
 }
 
 make_compose_env "$APP_IMAGE" "$TOOLING_IMAGE" "$COMPOSE_ENV"
@@ -185,19 +194,14 @@ done
 
 runtime_compose=(docker compose --profile tls --env-file "$COMPOSE_ENV" -f "$COMPOSE_FILE")
 if ! "${runtime_compose[@]}" up -d --no-build --remove-orphans mysql server nginx; then
-  if [ -n "$PREVIOUS_APP_IMAGE" ] && docker image inspect "$PREVIOUS_APP_IMAGE" >/dev/null 2>&1; then
-    rollback_env="$(mktemp /run/kaifanla-rollback.env.XXXXXX)"
-    make_compose_env "$PREVIOUS_APP_IMAGE" "$TOOLING_IMAGE" "$rollback_env"
-    rollback_compose=(docker compose --profile tls --env-file "$rollback_env" -f "$COMPOSE_FILE")
-    "${rollback_compose[@]}" up -d --no-build server nginx >/dev/null 2>&1 || true
-    rm -f -- "$rollback_env"
-  fi
+  rollback_application
   write_record failed "service-update"
   fail "service update failed; application rollback was attempted without reversing migrations"
 fi
 
 nginx_container="$("${runtime_compose[@]}" ps -q nginx)"
 [ -n "$nginx_container" ] || {
+  rollback_application
   write_record failed "nginx-missing"
   fail "nginx container is missing after update"
 }
@@ -212,13 +216,7 @@ if [ -n "$HEALTH_URL" ]; then
   health_environment+=("HEALTH_URL=$HEALTH_URL")
 fi
 if ! env "${health_environment[@]}" bash "$APP_ROOT/deploy/scripts/health-check.sh"; then
-  if [ -n "$PREVIOUS_APP_IMAGE" ] && docker image inspect "$PREVIOUS_APP_IMAGE" >/dev/null 2>&1; then
-    rollback_env="$(mktemp /run/kaifanla-rollback.env.XXXXXX)"
-    make_compose_env "$PREVIOUS_APP_IMAGE" "$TOOLING_IMAGE" "$rollback_env"
-    rollback_compose=(docker compose --profile tls --env-file "$rollback_env" -f "$COMPOSE_FILE")
-    "${rollback_compose[@]}" up -d --no-build server nginx >/dev/null 2>&1 || true
-    rm -f -- "$rollback_env"
-  fi
+  rollback_application
   write_record failed "health-check"
   fail "health check failed; application rollback was attempted without reversing migrations"
 fi

@@ -46,3 +46,31 @@
 - 配置 DNS、服务器安全组、防火墙、反向代理和 HTTPS
 - 部署数据库与后端，执行迁移并配置开机自启
 - 配置微信小程序合法域名，构建、上传、体验验证并提交审核
+
+## 更新服务器代码
+
+本地 Windows 电脑执行 `deploy/scripts/update-server.ps1`。脚本会先运行
+`pnpm run verify:server`，再在本地构建 `server` 和 Prisma tooling 镜像，压缩后通过
+SSH/SCP 上传到服务器。服务器端会校验生产环境文件权限、加载镜像、执行
+`prisma migrate deploy`、更新 Docker Compose 服务并运行 HTTPS 健康检查。
+
+默认参数已经对应上面的阿里云服务器和专用 SSH 私钥：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\deploy\scripts\update-server.ps1
+```
+
+自定义服务器或私钥时覆盖参数：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\deploy\scripts\update-server.ps1 `
+  -ServerHost 8.137.174.33 `
+  -SshUser root `
+  -SshPort 22 `
+  -IdentityFile "$env:USERPROFILE\.ssh\ordering_aliyun_ed25519"
+```
+
+脚本只上传生产 Compose、Nginx 配置、部署脚本和 Docker 镜像，不上传源码、生产环境文件或私钥。
+`-SkipChecks` 只跳过本地 `verify:server`，不跳过服务器端校验；`-KeepArtifacts` 会保留本地临时镜像压缩包供排障。
+
+执行更新前应先确认已有数据库备份。数据库迁移是向前迁移，脚本不会自动执行逆向迁移；如果服务更新后的健康检查失败，脚本只尝试恢复旧应用镜像。

@@ -5,6 +5,7 @@ param(
   [string] $SshUser = "root",
   [string] $IdentityFile = (Join-Path $env:USERPROFILE ".ssh\ordering_aliyun_ed25519"),
   [string] $RemoteRoot = "/opt/kaifanla",
+  [string] $RemoteEnvFile = "/etc/kaifanla/production.env",
   [string] $ReleaseId = ((Get-Date).ToUniversalTime().ToString("yyyyMMddTHHmmssZ")),
   [string] $Platform = "linux/amd64",
   [switch] $SkipChecks,
@@ -87,6 +88,9 @@ if ($RemoteRoot -notmatch '^/[A-Za-z0-9._/-]+$' -or $RemoteRoot.Contains("..")) 
   throw "RemoteRoot must be a simple absolute POSIX path"
 }
 $RemoteRoot = $RemoteRoot.TrimEnd("/")
+if ($RemoteEnvFile -notmatch '^/[A-Za-z0-9._/-]+$' -or $RemoteEnvFile.Contains("..")) {
+  throw "RemoteEnvFile must be a simple absolute POSIX path"
+}
 if ([string]::IsNullOrWhiteSpace($ReleaseId) -or $ReleaseId -notmatch '^[A-Za-z0-9][A-Za-z0-9._-]*$') {
   throw "ReleaseId contains unsupported characters"
 }
@@ -211,7 +215,7 @@ try {
     "bash $(ConvertTo-ShellLiteral "$remoteReleaseRoot/deploy.sh")",
     "--release-dir $(ConvertTo-ShellLiteral $remoteReleaseRoot)",
     "--app-root $(ConvertTo-ShellLiteral $RemoteRoot)",
-    "--env-file $(ConvertTo-ShellLiteral "/etc/kaifanla/production.env")",
+    "--env-file $(ConvertTo-ShellLiteral $RemoteEnvFile)",
     "--app-image $(ConvertTo-ShellLiteral $appImage)",
     "--tooling-image $(ConvertTo-ShellLiteral $toolingImage)"
   ) -join " "
