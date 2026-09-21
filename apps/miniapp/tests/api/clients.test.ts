@@ -49,7 +49,7 @@ describe("typed miniapp API clients", () => {
 
     const response = await fetchDishes();
 
-    expect(response.items[0]?.imageUrl).toBe("http://127.0.0.1:3000/media/dishes/beef.jpg");
+    expect(response.items[0]?.imageUrl).toBe("https://api.guziyi.cn/media/dishes/beef.jpg");
   });
 
   it("returns an absolute image URL for available favorite dishes", async () => {
@@ -62,7 +62,7 @@ describe("typed miniapp API clients", () => {
     expect(response.items[0]).toEqual(expect.objectContaining({
       available: true,
       dish: expect.objectContaining({
-        imageUrl: "http://127.0.0.1:3000/media/dishes/beef.jpg",
+        imageUrl: "https://api.guziyi.cn/media/dishes/beef.jpg",
       }),
     }));
   });

@@ -8,6 +8,6 @@ describe("WeChat login API", () => {
     wxBoundary.login.mockImplementation((options: { success: (reply: { code: string }) => void }) => options.success({ code: "wechat-code" }));
     wxBoundary.request.mockImplementation((options: { success: (reply: unknown) => void }) => options.success({ data: { code: 200, message: "success", data: { token: "token", expiresAt: "2099-01-01T00:00:00.000Z", onboardingCompleted: true } } }));
     await expect(loginWithWechat()).resolves.toMatchObject({ onboardingCompleted: true });
-    expect(wxBoundary.request).toHaveBeenCalledWith(expect.objectContaining({ url: "http://127.0.0.1:3000/api/v1/auth/wechat", method: "POST", data: { code: "wechat-code" } }));
+    expect(wxBoundary.request).toHaveBeenCalledWith(expect.objectContaining({ url: "https://api.guziyi.cn/api/v1/auth/wechat", method: "POST", data: { code: "wechat-code" } }));
   });
 });

@@ -1,5 +1,5 @@
 export const API_ORIGINS = {
-  develop: "http://127.0.0.1:3000",
+  develop: "https://api.guziyi.cn",
   trial: "https://api.guziyi.cn",
   release: "https://api.guziyi.cn",
 } as const;
