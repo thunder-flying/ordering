@@ -1,10 +1,6 @@
 # 项目协作规则
 
-## 禁止擅自操作 Git
+## Git 操作约定
 
-- 绝对禁止 AI 助手执行 `git add` 和 `git commit`（含等价操作，如暂存、提交、`commit --amend`）。即使用户明确要求，也不执行这两项操作。
-- 默认禁止执行其他 Git 命令，包括只读查询以及 `branch`、`checkout`、`switch`、`merge`、`rebase`、`reset`、`restore`、`stash`、`tag`、`push`、`pull`、`fetch` 等。
-- 只有用户在当前请求中明确要求执行某项非 add/commit 的 Git 操作时，才允许执行该项操作；不能把开发、修复、验收或“完成项目”等请求视为 Git 授权。
-- Git 授权仅限用户明确指定的操作和范围，不自动延续到后续请求，也不能扩展为提交、推送、回退或其他操作。
-- 未获得明确授权时，只修改项目文件并报告修改结果，不切换分支，也不以 Git 命令检查状态或差异。
-- 如果任务必须依赖 Git 信息或操作才能继续，应先向用户说明原因并等待明确授权；其中 `add`/`commit` 仍不可执行。
+- 禁止 AI 助手执行 `git add`（含等价暂存操作，如 `git add -A`、`git stage` 等）。即使用户明确要求，也不执行。
+- 其他 Git 命令（含只读查询、`status`、`diff`、`log`、`branch`、`checkout`、`push`、`pull`、`fetch`、`commit` 等）可按任务需要执行；`commit` 仅在用户明确要求时执行。
