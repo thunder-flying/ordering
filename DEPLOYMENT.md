@@ -39,6 +39,35 @@
 - 生产数据库名称、账号及端口：部署时创建且不暴露公网
 - 数据库密码：仅保存在服务器生产环境变量或受限配置中，不写入本文件
 
+## 初始化菜单数据
+
+生产数据库完成迁移后，需要额外执行一次菜单种子导入。种子脚本会写入项目自带的分类、菜品和菜品图片；重复执行会更新匹配的同名种子数据（包括价格、描述、图片、分类启用和菜品发布状态），并可能删除无菜品的旧“家常菜”种子分类。已有人工修改时请先备份。
+
+将项目中的 `deploy/scripts/seed-production.sh` 拖动到服务器目录：
+
+```text
+/opt/kaifanla/deploy/scripts/seed-production.sh
+```
+
+然后在服务器上执行：
+
+```bash
+bash /opt/kaifanla/deploy/scripts/seed-production.sh
+```
+
+脚本固定使用 `/etc/kaifanla/production.env`、`/opt/kaifanla/deploy/docker-compose.prod.yml` 和 `kaifanla_uploads` 卷，并会先检查生产环境文件权限、Compose 配置、上传卷以及已经运行且健康的 MySQL 服务。使用 `--no-deps` 跳过 MySQL 启动，并通过 `docker image inspect` 确认配置的工具镜像已在服务器加载；缺少镜像时直接停止。为兼容服务器的 Compose 版本，不使用 `run --pull` 参数。遇到 `unknown flag: --pull`，覆盖更新后的脚本后重试即可，无需为此升级 Docker。
+
+脚本显式指定 `/bin/sh -c` 入口，使用镜像内的 Node 和 tsx 执行 `prisma/seed.ts`，不依赖 pnpm 入口。遇到 `/bin/sh: 0: cannot open pnpm` 时，将更新后的脚本拖到上述路径覆盖，再执行同一条 bash 命令。如果提示工具文件缺失，请检查 `production.env` 的 `TOOLING_IMAGE` 是否对应已加载的完整 tooling 镜像；只拖动脚本不会更新镜像内的种子代码和图片。
+
+若遇到 `EACCES: permission denied, mkdir '/var/lib/kaifanla/uploads/dishes'`，覆盖最新版脚本后重试。脚本先在一次性 root 工具容器内创建图片目录，将上传卷根目录和 `dishes` 目录本身设为 `10001:10001`、权限 `0755`；不递归修改已有文件。实际种子导入仍由普通用户 `10001:10001` 执行。若已有图片文件自身不可写，仍需按具体报错排查文件权限。
+
+菜单导入完成后验证：
+
+```text
+https://api.guziyi.cn/api/v1/categories
+https://api.guziyi.cn/api/v1/dishes
+```
+
 ## 待确认/待执行
 
 - 已确认项目为原生微信 TypeScript 小程序 + Next.js 16 模块化单体 + MySQL 8.4 + Prisma 7
