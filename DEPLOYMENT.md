@@ -70,6 +70,14 @@ https://api.guziyi.cn/api/v1/dishes
 
 ## 待确认/待执行
 
+### 2026-09-22 菜单连接关闭排查记录
+
+- 种子导入后，生产应用内部的分类接口返回 9 个分类，菜品接口可返回番茄炒蛋、鱼香肉丝等数据；从 ECS 访问公网 HTTPS 的健康、分类、菜品接口均为 HTTP 200。
+- Windows 微信开发者工具请求 `/api/v1/dishes?limit=20` 报 `net::ERR_CONNECTION_CLOSED`。同一台 Windows 电脑直接请求该 HTTPS 接口时，TLS 握手被重置；HTTP 健康接口返回 `403`、`Server: Beaver`，页面标题为 `Non-compliance ICP Filing`，指向阿里云备案拦截页。
+- 因此服务器内接口正常不能证明所有公网访问正常；此时无需重复导入菜单。应在阿里云核查 `guziyi.cn` 的网站备案和接入状态。如已完成阿里云接入，提交工单，附上域名 `api.guziyi.cn`、ECS 公网 IP `8.137.174.33`、上述响应和拦截页标识 `00000000005854151745`，请求核查公网备案阻断及状态同步。
+- 处理后从原 Windows 网络再次验证 HTTPS 菜单接口，并在微信开发者工具重试。以公网实际恢复为准，不能仅凭 ECS 自测或健康检查判定问题已解决。
+- 官方排查说明：https://help.aliyun.com/zh/icp-filing/basic-icp-service/web-site-for-the-record-to-block-1
+
 - 已确认项目为原生微信 TypeScript 小程序 + Next.js 16 模块化单体 + MySQL 8.4 + Prisma 7
 - 检查生产构建命令和后端监听端口
 - 配置 DNS、服务器安全组、防火墙、反向代理和 HTTPS
