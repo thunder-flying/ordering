@@ -32,6 +32,16 @@ function decodeDishId(raw: string | undefined): string {
 }
 
 Page({
+  onShareAppMessage() {
+    const { dishId, dish } = this.data;
+    return {
+      title: dish ? `${dish.name} · 今日饭单` : "今日饭单 · 一起挑选今天的菜",
+      path: dishId
+        ? `/pages/dish-detail/index?id=${encodeURIComponent(dishId)}`
+        : "/pages/select/index",
+    };
+  },
+
   data: {
     dishId: "",
     status: "loading" as "loading" | "ready" | "unavailable" | "error",

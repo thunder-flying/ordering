@@ -8,7 +8,7 @@
     "pages/profile/index"
   ],
   "window": {
-    "navigationBarTitleText": "开饭啦",
+    "navigationBarTitleText": "今日饭单",
     "navigationBarBackgroundColor": "#F7F3EA",
     "navigationBarTextStyle": "black",
     "backgroundColor": "#F7F3EA",

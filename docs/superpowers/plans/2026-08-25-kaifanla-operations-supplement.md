@@ -1,4 +1,4 @@
-# 「开饭啦」运维计划补强实施计划
+# 「今日饭单」运维计划补强实施计划
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to apply this mandatory companion while executing `2026-08-25-kaifanla-operations-and-deployment.md`. Steps use checkbox (`- [ ]`) syntax for tracking.
 

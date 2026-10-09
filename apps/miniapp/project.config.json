@@ -1,4 +1,5 @@
 {
+  "projectname": "今日饭单",
   "appid": "wx0006792d6129b164",
   "miniprogramRoot": "src/",
   "compileType": "miniprogram",

@@ -1,8 +1,8 @@
-# 「开饭啦」小程序发布实施计划
+# 「今日饭单」小程序发布实施计划
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 将已验证的「开饭啦」体验版提交微信审核并发布正式版，同时保证名称、域名、隐私声明和实际功能一致。
+**Goal:** 将已验证的「今日饭单」体验版提交微信审核并发布正式版，同时保证名称、域名、隐私声明和实际功能一致。
 
 **Architecture:** 体验版和正式版只访问已通过生产验收的 `https://api.guziyi.cn`。代码验证在本地完成，名称申请、合法域名、隐私声明、服务类目、上传审核和发布由资源所有者在微信公众平台/开发者工具完成，每个外部步骤都用真实设备行为验证。
 
@@ -17,7 +17,7 @@
 ## Global Constraints
 
 - 小程序 AppID 固定为 `wx0006792d6129b164`，代码与上传项目必须一致。
-- 产品名称为“开饭啦”；正式名称只通过微信公众平台合规申请，不用代码冒充平台名称。
+- 产品名称为“今日饭单”；正式名称只通过微信公众平台合规申请，不用代码冒充平台名称。
 - 产品是个人菜单与选菜清单，不描述为点单、外卖、支付、门店、桌台、配送或履约服务。
 - request、uploadFile、downloadFile 合法域名均使用 `https://api.guziyi.cn`，不关闭正式版 URL 校验。
 - 隐私声明准确覆盖微信身份映射、可选头像/昵称、收藏、清单、清空数据和账号注销。
@@ -29,7 +29,7 @@
 ## File Map
 
 ```text
-apps/miniapp/src/app.json                 全局标题“开饭啦”
+apps/miniapp/src/app.json                 全局标题“今日饭单”
 apps/miniapp/project.config.json          AppID、URL 校验、上传设置
 apps/miniapp/project.private.config.json  本地开发者工具名称
 apps/miniapp/src/config.ts                develop/trial/release Origin
@@ -57,7 +57,7 @@ DEPLOYMENT.md                             非敏感发布状态
 
 - [ ] **Step 2: 确认最终配置内容**
 
-`apps/miniapp/src/app.json` 全局标题为“开饭啦”；`project.private.config.json` 项目名为“开饭啦”；`src/config.ts` 为：
+`apps/miniapp/src/app.json` 全局标题为“今日饭单”；`project.private.config.json` 项目名为“今日饭单”；`src/config.ts` 为：
 
 ```ts
 export const API_ORIGINS = {
@@ -98,7 +98,7 @@ Expected: 四条命令全部退出 0，无 warning 或秘密输出。
 
 在操作当天只使用微信公众平台控制台显示的名称规则、个人主体可选服务类目、备案状态和隐私配置要求。若控制台与旧文档不一致，以控制台为准并把非敏感差异写入发布清单。
 
-- [ ] **Step 2: 申请正式名称“开饭啦”**
+- [ ] **Step 2: 申请正式名称“今日饭单”**
 
 提交名称申请前在平台内检查占用与受保护词提示。若平台拒绝该名称，不使用近似字符规避；停止发布并让用户重新选择名称，再同步修改代码和设计记录。
 
@@ -143,7 +143,7 @@ Expected: 四条命令全部退出 0，无 warning 或秘密输出。
 
 - [ ] **Step 3: 上传带语义版本的体验版**
 
-首次版本使用 `1.0.0`，说明填写“开饭啦首次上线：个人选菜、收藏、清单和可选资料”。不使用“下单”“支付”“外卖”措辞。上传成功后把平台生成的时间和版本写入发布清单。
+首次版本使用 `1.0.0`，说明填写“今日饭单首次上线：个人选菜、收藏、清单和可选资料”。不使用“下单”“支付”“外卖”措辞。上传成功后把平台生成的时间和版本写入发布清单。
 
 ### Task 4: 双账号、双平台体验验收
 
@@ -203,7 +203,7 @@ Expected: 四条命令全部退出 0，无 warning 或秘密输出。
 
 - [ ] **Step 4: 发布后独立验证**
 
-使用未加入体验成员的微信账号搜索“开饭啦”，进入正式版并执行登录、菜单、收藏、保存清单和图片加载烟雾测试。服务端日志仅核对状态码、路径和请求 ID，不读取用户私有数据。
+使用未加入体验成员的微信账号搜索“今日饭单”，进入正式版并执行登录、菜单、收藏、保存清单和图片加载烟雾测试。服务端日志仅核对状态码、路径和请求 ID，不读取用户私有数据。
 
 - [ ] **Step 5: 建立月度运维清单**
 

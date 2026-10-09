@@ -22,6 +22,13 @@ function messageFor(error: unknown, fallback: string): string {
 }
 
 Page({
+  onShareAppMessage() {
+    return {
+      title: "今日饭单 · 一起挑选今天的菜",
+      path: "/pages/select/index",
+    };
+  },
+
   data: {
     phase: "loading" as OnboardingPhase,
     nickname: "",

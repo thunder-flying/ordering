@@ -1,8 +1,8 @@
-# 「开饭啦」运维与上线实施计划
+# 「今日饭单」运维与上线实施计划
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 为「开饭啦」建立可恢复备份、可回滚部署、健康监控，并把已验证镜像安全部署到专用阿里云 ECS。
+**Goal:** 为「今日饭单」建立可恢复备份、可回滚部署、健康监控，并把已验证镜像安全部署到专用阿里云 ECS。
 
 **Architecture:** systemd 调用受控 Docker Compose 一次性任务完成备份、健康检查、证书续期和上传清理。生产镜像从本机经 SSH 传输到 ECS，更新前备份并记录旧镜像 ID，数据库迁移只向前执行，应用健康失败只回滚应用镜像。
 

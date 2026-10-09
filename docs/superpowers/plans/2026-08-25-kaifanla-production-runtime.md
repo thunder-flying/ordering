@@ -1,8 +1,8 @@
-# 「开饭啦」生产运行时实施计划
+# 「今日饭单」生产运行时实施计划
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 生成并验证可在阿里云 ECS 上安全运行的「开饭啦」Next.js、MySQL 8.4 与 Nginx Docker Compose 运行时。
+**Goal:** 生成并验证可在阿里云 ECS 上安全运行的「今日饭单」Next.js、MySQL 8.4 与 Nginx Docker Compose 运行时。
 
 **Architecture:** Windows 本机完成全部测试和多阶段镜像构建，ECS 只加载并运行镜像。Nginx 是唯一公网应用入口，Next.js 与 MySQL 仅通过内部 Docker 网络通信，数据库和上传文件使用独立持久卷。
 
@@ -12,7 +12,7 @@
 
 ## Global Constraints
 
-- 小程序名称为“开饭啦”，AppID 为 `wx0006792d6129b164`。
+- 小程序名称为“今日饭单”，AppID 为 `wx0006792d6129b164`。
 - 体验版与正式版 API Origin 均为 `https://api.guziyi.cn`；开发版保持 `http://127.0.0.1:3000`。
 - 生产 MySQL 不发布宿主机端口；公网应用端口仅为 80/443。
 - 服务端运行用户不是 root，根文件系统只读，仅 `/tmp` 与 `/var/lib/kaifanla/uploads` 可写。
@@ -72,13 +72,13 @@ Expected: 两条命令均退出 0；若失败，先记录为既有失败并停�
 `apps/miniapp/src/app.json`：
 
 ```json
-"navigationBarTitleText": "开饭啦"
+"navigationBarTitleText": "今日饭单"
 ```
 
 `apps/miniapp/project.private.config.json`：
 
 ```json
-"projectname": "开饭啦"
+"projectname": "今日饭单"
 ```
 
 `apps/miniapp/src/config.ts`：

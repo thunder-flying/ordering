@@ -52,6 +52,13 @@ function confirmDialog(options: { title: string; content: string; confirmText?: 
 function characterLength(value: string): number { return Array.from(value).length; }
 
 Page({
+  onShareAppMessage() {
+    return {
+      title: "今日饭单 · 一起挑选今天的菜",
+      path: "/pages/select/index",
+    };
+  },
+
   data: {
     name: "",
     items: [] as DraftViewItem[],

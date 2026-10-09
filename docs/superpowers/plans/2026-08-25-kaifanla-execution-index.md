@@ -1,8 +1,8 @@
-# 「开饭啦」上线执行索引
+# 「今日饭单」上线执行索引
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development or superpowers:executing-plans. This index is authoritative when it conflicts with an earlier plan. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 锁定「开饭啦」生产上线的执行顺序，并保证 OSS 只接收 Restic 加密仓库，不接收原始数据库导出。
+**Goal:** 锁定「今日饭单」生产上线的执行顺序，并保证 OSS 只接收 Restic 加密仓库，不接收原始数据库导出。
 
 **Architecture:** 先完成本地生产运行时，再完成 ECS 运维与部署，最后发布微信小程序。运维补强计划嵌入对应主任务；本文件中的备份边界替换运维主计划的备份同步片段。
 

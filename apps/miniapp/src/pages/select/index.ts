@@ -67,6 +67,13 @@ async function fetchAvailableFavorites(): Promise<PublicDishDto[]> {
 }
 
 Page({
+  onShareAppMessage() {
+    return {
+      title: "今日饭单 · 一起挑选今天的菜",
+      path: "/pages/select/index",
+    };
+  },
+
   data: {
     categories: [] as Array<{ id: string; name: string }>,
     sourceItems: [] as PublicDishDto[],
