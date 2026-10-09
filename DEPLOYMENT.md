@@ -86,6 +86,14 @@ https://api.guziyi.cn/api/v1/dishes
 
 ## 更新服务器代码
 
+### 2026-10-09 后台静态资源修复
+
+- 线上旧镜像 `kaifanla-server:local` 的工作目录为 `/app/apps/server/.next/standalone`，实际入口为该目录下的 `apps/server/server.js`；JS、CSS 却位于外层 `/app/apps/server/.next/static`，导致登录页返回 200、静态资源返回 404。
+- 基于原线上镜像构建修复镜像 `kaifanla-server:static-repair-20261009T085402Z`，将静态资源和 public 复制到实际应用目录，更新生产环境的 `APP_IMAGE`，重新创建应用容器并重启 Nginx。
+- 从 ECS 通过 `https://api.guziyi.cn/admin/login` 提取并请求全部 10 个 JS、CSS，均为 HTTP 200，内容非空且 MIME 类型正确；HTTPS 健康接口返回 `status: ok`。此验证不代表原 Windows 网络访问情况。
+- 旧镜像保留，部署前环境文件备份在服务器受限目录 `/opt/kaifanla/incoming/static-repair-20261009T085402Z/production.env.previous`，不写入项目。
+- 后续完整发布使用下述本地构建脚本和当前 `apps/server/Dockerfile`，保证 standalone 入口和静态资源使用一致目录。本次只修复现有线上版本的资源目录，未发布本地新功能，也未执行数据库迁移。
+
 本地 Windows 电脑执行 `deploy/scripts/update-server.ps1`。脚本会先运行
 `pnpm run verify:server`，再在本地构建 `server` 和 Prisma tooling 镜像，压缩后通过
 SSH/SCP 上传到服务器。服务器端会校验生产环境文件权限、加载镜像、执行
