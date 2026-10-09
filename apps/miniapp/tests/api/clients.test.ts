@@ -68,8 +68,9 @@ describe("typed miniapp API clients", () => {
   });
 
   it("uses only server-owned profile routes", async () => {
-    request.mockResolvedValue(undefined);
-    upload.mockResolvedValue(undefined);
+    const profile = { nickname: "新名字", avatarUrl: null, profileComplete: false, onboardingCompleted: true };
+    request.mockResolvedValue(profile);
+    upload.mockResolvedValue(profile);
     await updateNickname("  新名字  ");
     await saveAvatar("tmp/avatar.png");
     await completeOnboarding();

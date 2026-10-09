@@ -22,6 +22,13 @@ function messageFor(error: unknown, fallback: string): string {
 }
 
 Page({
+  onShareTimeline() {
+    return {
+      title: "今日饭单 · 一起挑选今天的菜",
+      query: "",
+    };
+  },
+
   onShareAppMessage() {
     return {
       title: "今日饭单 · 一起挑选今天的菜",

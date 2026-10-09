@@ -32,6 +32,14 @@ function decodeDishId(raw: string | undefined): string {
 }
 
 Page({
+  onShareTimeline() {
+    const { dishId, dish } = this.data;
+    return {
+      title: dish ? `${dish.name} · 今日饭单` : "今日饭单 · 一起挑选今天的菜",
+      query: dishId ? `id=${encodeURIComponent(dishId)}` : "",
+    };
+  },
+
   onShareAppMessage() {
     const { dishId, dish } = this.data;
     return {

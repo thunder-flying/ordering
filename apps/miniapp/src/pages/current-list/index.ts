@@ -52,6 +52,13 @@ function confirmDialog(options: { title: string; content: string; confirmText?: 
 function characterLength(value: string): number { return Array.from(value).length; }
 
 Page({
+  onShareTimeline() {
+    return {
+      title: "今日饭单 · 一起挑选今天的菜",
+      query: "",
+    };
+  },
+
   onShareAppMessage() {
     return {
       title: "今日饭单 · 一起挑选今天的菜",
