@@ -210,7 +210,7 @@ Page({
       clearProfile: clearProfileState,
       clearDraft,
       clearFavorites,
-      relaunch: () => wx.reLaunch({ url: "/pages/onboarding/index" }),
+      relaunch: () => wx.reLaunch({ url: "/pages/select/index" }),
     });
     if (result.status === "failed") {
       this.setData({

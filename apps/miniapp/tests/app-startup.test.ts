@@ -7,6 +7,7 @@ const wxBoundary = { reLaunch: vi.fn() };
 const appBoundary = vi.fn();
 
 afterEach(() => {
+  vi.clearAllMocks();
   vi.resetModules();
   vi.restoreAllMocks();
 });
@@ -28,8 +29,11 @@ describe("miniapp startup routing", () => {
     expect(wxBoundary.reLaunch).not.toHaveBeenCalled();
   });
 
-  it("redirects an incomplete user to onboarding", async () => {
+  it("lets a new user browse without opening profile authorization", async () => {
     await startWith(false);
-    expect(wxBoundary.reLaunch).toHaveBeenCalledWith({ url: "/pages/onboarding/index" });
+    expect(wxBoundary.reLaunch).not.toHaveBeenCalled();
+    expect(appBoundary).toHaveBeenCalledWith(expect.objectContaining({
+      globalData: { ready: expect.any(Promise) },
+    }));
   });
 });

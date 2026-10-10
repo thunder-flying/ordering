@@ -2,14 +2,8 @@ import { ensureSession } from "./state/session";
 
 const ready = ensureSession();
 
-ready.then(
-  (session) => {
-    if (!session.onboardingCompleted) {
-      wx.reLaunch({ url: "/pages/onboarding/index" });
-    }
-  },
-  () => undefined,
-);
+// Session readiness must not interrupt browsing with optional profile authorization.
+ready.catch(() => undefined);
 
 App({
   globalData: { ready },
