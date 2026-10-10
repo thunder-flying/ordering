@@ -57,6 +57,7 @@ export const PUBLIC_MENU_SEED: SeedCategory[] = [
       { name: "麻婆豆腐", description: "嫩豆腐配牛肉末和花椒，麻辣鲜香，汤汁浓郁。", priceCents: 1_380, assetFileName: "mapo-tofu.webp" },
       { name: "猪肉炖粉条", description: "五花肉与粉条一锅慢炖，汤汁浓郁，粉条吸满肉香。", priceCents: 2_680, assetFileName: "pork-vermicelli-stew.webp" },
       { name: "东北大乱炖", description: "土豆、茄子、豆角和五花肉一锅炖煮，家常浓郁，热乎下饭。", priceCents: 3_280, assetFileName: "northeast-stew.webp" },
+      { name: "锅包肉", description: "猪里脊裹浆炸至金黄酥脆，淋上酸甜汁，外酥里嫩。", priceCents: 2_880, assetFileName: "guo-bao-rou.webp" },
     ],
   },
   {
