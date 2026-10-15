@@ -86,6 +86,16 @@ https://api.guziyi.cn/api/v1/dishes
 
 ## 更新服务器代码
 
+### 2026-10-15 后端发布与锅包肉上线
+
+- 已发布应用镜像 `kaifanla-server:20261015T021500Z-runtime-repair`，工具镜像为 `kaifanla-tooling:20261015T021500Z`；当前版本已保存到服务器 `/etc/kaifanla/production.env`。
+- 发布前数据库备份：`/var/backups/kaifanla/predeploy-20261015.sql.gz`；旧版本环境配置：`/etc/kaifanla/production.env.predeploy-20261015`，均仅保存在服务器受限目录。
+- 本地完整发布检查通过：71 项单元测试、32 项数据库集成测试、lint、类型检查和生产构建。生产数据库没有待执行迁移。
+- 本次使用缓存中的相同 Node 基础镜像完成构建。服务器无法稳定连接 Docker Hub/npm，生产 Compose 使用既有的 `kaifanla-mysql:8.4-b3b90af2`、`kaifanla-nginx:stable-1e0bd91d`、`kaifanla-certbot:latest-34ee91d2` 离线镜像；迁移直接通过 Node 调用镜像内 Prisma CLI，避免 Corepack 下载。
+- 原始运行镜像遗漏了 `@swc/helpers` 的部分文件及 `tslib`，启动失败后已自动回滚。修复镜像从同一发布的工具镜像补齐 `@swc+helpers@0.5.23` 和 `tslib@2.8.1`，独立容器验证后上线。后续完整构建仍需修复仓库中的依赖打包和离线部署流程；当前仓库的原部署脚本尚未包含本次服务器上的适配。
+- 仅新增“家常热菜”分类下的锅包肉，参考价格 28.80 元，已上架并关联图片；未重新导入整套种子菜单。
+- 从当前 Windows 网络验证 HTTPS 健康接口、分类、锅包肉查询及图片、后台登录页和全部 10 个 JS/CSS 资源，均成功返回；服务器健康检查通过。
+
 ### 2026-10-09 后台静态资源修复
 
 - 线上旧镜像 `kaifanla-server:local` 的工作目录为 `/app/apps/server/.next/standalone`，实际入口为该目录下的 `apps/server/server.js`；JS、CSS 却位于外层 `/app/apps/server/.next/static`，导致登录页返回 200、静态资源返回 404。
