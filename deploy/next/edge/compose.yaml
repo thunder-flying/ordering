@@ -1,0 +1,20 @@
+name: shared-edge
+
+services:
+  caddy:
+    image: caddy:2.10.2-alpine
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      ACME_EMAIL: ${ACME_EMAIL:?ACME_EMAIL is required}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./sites:/etc/caddy/sites:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    logging:
+      options: {max-size: "10m", max-file: "5"}
+
+volumes:
+  caddy-data: {}
+  caddy-config: {}

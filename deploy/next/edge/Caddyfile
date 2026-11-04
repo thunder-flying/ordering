@@ -1,0 +1,5 @@
+{
+	email {$ACME_EMAIL}
+}
+
+import sites/*.caddy

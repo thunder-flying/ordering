@@ -1,0 +1,124 @@
+name: ordering
+
+services:
+  mysql:
+    image: ${MYSQL_IMAGE:-mysql:8.4@sha256:b3b90af2a6552ae30c266fdb7d5dd55f3afb72404bb78d37fe8a23eb857fd3fb}
+    restart: unless-stopped
+    command:
+      - --innodb-buffer-pool-size=268435456
+      - --max-connections=60
+      - --performance-schema=OFF
+      - --skip-log-bin
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-ordering}
+      MYSQL_USER: ${MYSQL_USER:-ordering_app}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?MYSQL_PASSWORD is required}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=\"$${MYSQL_ROOT_PASSWORD}\" mysqladmin ping -h 127.0.0.1 -uroot --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - internal
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 640m
+    logging:
+      options: {max-size: "10m", max-file: "5"}
+
+  server:
+    image: ${APP_IMAGE:?APP_IMAGE is required}
+    restart: unless-stopped
+    user: "10001:10001"
+    read_only: true
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: mysql://${MYSQL_USER:-ordering_app}:${MYSQL_PASSWORD:?MYSQL_PASSWORD is required}@mysql:3306/${MYSQL_DATABASE:-ordering}
+      OPENID_HMAC_SECRET: ${OPENID_HMAC_SECRET:?OPENID_HMAC_SECRET is required}
+      WECHAT_APP_ID: ${WECHAT_APP_ID:?WECHAT_APP_ID is required}
+      WECHAT_APP_SECRET: ${WECHAT_APP_SECRET:?WECHAT_APP_SECRET is required}
+      USER_SESSION_PEPPER: ${USER_SESSION_PEPPER:?USER_SESSION_PEPPER is required}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:?ADMIN_PASSWORD_HASH is required}
+      ADMIN_SESSION_SECRET: ${ADMIN_SESSION_SECRET:?ADMIN_SESSION_SECRET is required}
+      UPLOAD_ROOT: /var/lib/kaifanla/uploads
+    depends_on:
+      mysql: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/v1/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    volumes:
+      - uploads:/var/lib/kaifanla/uploads
+    networks:
+      - internal
+      - app
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 576m
+    logging:
+      options: {max-size: "10m", max-file: "5"}
+
+  tooling:
+    image: ${TOOLING_IMAGE:?TOOLING_IMAGE is required}
+    profiles: [tools]
+    user: "10001:10001"
+    read_only: true
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: mysql://${MYSQL_USER:-ordering_app}:${MYSQL_PASSWORD:?MYSQL_PASSWORD is required}@mysql:3306/${MYSQL_DATABASE:-ordering}
+      UPLOAD_ROOT: /var/lib/kaifanla/uploads
+    depends_on:
+      mysql: {condition: service_healthy}
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    volumes:
+      - uploads:/var/lib/kaifanla/uploads
+    networks:
+      - internal
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m
+
+  nginx:
+    image: ${NGINX_IMAGE:-nginx:stable@sha256:1e0bd91de37893cc71edf5eb3e56c918efae309a81db0afe4b9698809676d071}
+    restart: unless-stopped
+    read_only: true
+    depends_on:
+      server: {condition: service_healthy}
+    environment:
+      APP_DOMAIN: ordering.guziyi.cn
+      NGINX_ENVSUBST_FILTER: ^APP_DOMAIN$
+    ports:
+      - "127.0.0.1:18080:8080"
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+      - /var/cache/nginx:size=64m,mode=0755
+      - /var/run:size=16m,mode=0755
+      - /etc/nginx/conf.d:size=16m,mode=0755
+    volumes:
+      - ./nginx/default.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ./nginx/security-headers.conf:/etc/nginx/snippets/security-headers.conf:ro
+    networks:
+      - app
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128m
+    logging:
+      options: {max-size: "10m", max-file: "5"}
+
+networks:
+  internal: {internal: true}
+  app: {}
+
+volumes:
+  mysql-data: {}
+  uploads: {}
