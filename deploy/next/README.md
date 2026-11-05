@@ -1,6 +1,6 @@
 # 新服务器部署说明
 
-适用于重装后的 Ubuntu 22.04 服务器。当前文件是待上线配置；旧 `deploy/docker-compose.prod.yml` 属于历史部署，不用于新服务器。
+适用于重装后的 Ubuntu 22.04 服务器。当前文件是待上线配置。
 
 ## 项目边界
 
@@ -16,6 +16,14 @@
 
 ### 生产配置需要什么
 
+本地项目中的 `.env.production.local`、`.env.edge.local` 和 `.env.admin.local` 是此机器专用的真实配置文件，均被根目录 `.gitignore` 的 `.env*` 规则忽略，权限为 `0600`。`.env.admin.local` 保存生成的管理员明文密码；不要把这些文件加入 Git。填写 `.env.production.local` 的 `WECHAT_APP_SECRET` 和 `.env.edge.local` 的 `ACME_EMAIL` 后，运行：
+
+```bash
+python3 deploy/next/scripts/validate_env.py deploy/next/.env.production.local
+```
+
+验证通过后，再通过 SSH 将前两个文件安装到服务器 `/etc/ordering/production.env` 和 `/etc/ordering/edge.env`，属主为 `root:root`、权限为 `0600`。`.env.admin.local` 仅留在本机，不上传服务器。当前镜像标签仍是本地占位值，首次启动前须改为实际已加载的镜像标签。
+
 项目已提供 [`env.example`](env.example) 作为变量清单，以及 [`scripts/init-env.sh`](scripts/init-env.sh) 生成服务器配置。脚本会在终端交互式读取三项由你提供的值：
 
 | 输入 | 来源 | 用途 |
@@ -24,7 +32,7 @@
 | 管理员密码（至少 16 字符） | 你自行设定 | 生成 Argon2id 密码哈希，供后台登录 |
 | ACME 联系邮箱 | 你可收信的邮箱 | Caddy 自动签发与续期 HTTPS 证书 |
 
-脚本会在服务器生成数据库密码、HMAC 密钥和会话密钥，并创建 `/etc/ordering/production.env` 与 `/etc/ordering/edge.env`。真实值不进入项目文件或 Git。运行前服务器需要 `argon2`、`openssl` 和 `python3`。在服务器终端执行：
+若从零开始且没有本地配置，脚本也可在服务器生成数据库密码、HMAC 密钥和会话密钥，并创建 `/etc/ordering/production.env` 与 `/etc/ordering/edge.env`。运行前服务器需要 `argon2`、`openssl` 和 `python3`。在服务器终端执行：
 
 ```bash
 sudo /opt/ordering/deploy/next/scripts/init-env.sh

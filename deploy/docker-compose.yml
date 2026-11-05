@@ -19,4 +19,4 @@ services:
       timeout: 2s
       retries: 30
     volumes:
-      - ./mysql-ordering-init:/docker-entrypoint-initdb.d:ro
+      - ./mysql-test-init:/docker-entrypoint-initdb.d:ro

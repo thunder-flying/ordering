@@ -14,6 +14,7 @@ var/uploads/
 project.private.config.json
 *.log
 *.tsbuildinfo
+__pycache__/
 .playwright-server.pid
 apps/server/src/generated/prisma/
 apps/server/dist-cli/
