@@ -28,7 +28,7 @@ describe("profile avatar URLs", () => {
     vi.mocked(upload).mockResolvedValue(profile);
     expect(await operation()).toEqual({
       ...profile,
-      avatarUrl: "https://api.guziyi.cn/media/avatars/avatar.jpg?expires=1791500000&signature=abc",
+      avatarUrl: "https://ordering.guziyi.cn/media/avatars/avatar.jpg?expires=1791500000&signature=abc",
     });
     expect(profile.avatarUrl).toBe("/media/avatars/avatar.jpg?expires=1791500000&signature=abc");
   });

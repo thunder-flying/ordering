@@ -1,7 +1,7 @@
 export const API_ORIGINS = {
-  develop: "https://api.guziyi.cn",
-  trial: "https://api.guziyi.cn",
-  release: "https://api.guziyi.cn",
+  develop: "https://ordering.guziyi.cn",
+  trial: "https://ordering.guziyi.cn",
+  release: "https://ordering.guziyi.cn",
 } as const;
 
 type Environment = keyof typeof API_ORIGINS;

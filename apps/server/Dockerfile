@@ -49,6 +49,9 @@ WORKDIR /app
 RUN groupadd --gid 10001 kaifanla \
   && useradd --uid 10001 --gid 10001 --create-home --shell /usr/sbin/nologin kaifanla
 COPY --from=build --chown=10001:10001 /app/apps/server/.next/standalone ./
+COPY --from=build --chown=10001:10001 /app/node_modules/.pnpm/@swc+helpers@0.5.23/node_modules/@swc/helpers/ ./node_modules/.pnpm/@swc+helpers@0.5.23/node_modules/@swc/helpers/
+COPY --from=build --chown=10001:10001 /app/node_modules/.pnpm/@swc+helpers@0.5.23/node_modules/tslib ./node_modules/.pnpm/@swc+helpers@0.5.23/node_modules/tslib
+COPY --from=build --chown=10001:10001 /app/node_modules/.pnpm/tslib@2.8.1/node_modules/tslib/ ./node_modules/.pnpm/tslib@2.8.1/node_modules/tslib/
 COPY --from=build --chown=10001:10001 /app/apps/server/.next/static ./apps/server/.next/static
 COPY --from=build --chown=10001:10001 /app/apps/server/public ./apps/server/public
 COPY --from=build --chown=10001:10001 /app/apps/server/dist-cli ./apps/server/dist-cli
